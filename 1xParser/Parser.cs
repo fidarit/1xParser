@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 
@@ -6,7 +7,7 @@ namespace _1xParser
 {
     static class Parser
     {
-
+        private static DateTime utcHelper = new DateTime(1970, 1, 1);
         public static void ParseLine()
         {
             string fURL = "https://1xstavka.ru/line/Handball/";
@@ -29,7 +30,7 @@ namespace _1xParser
             objs = serializer.Deserialize<jsonFormats.RootObj[]>(mass);
             //
 
-            File.WriteAllText("123.txt", mass);
+            File.WriteAllText("1.txt", serializer.Serialize(Program.games));
         }
 
         public static void ParseLive()
@@ -54,9 +55,28 @@ namespace _1xParser
 
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             objs = serializer.Deserialize<jsonFormats.RootObj[]>(mass);
+            
+            for(int i = 0; i < objs.Length; i++)
+            {
+                long id = objs[i].CI;
+                if (Program.games.ContainsKey(id))
+                {
+                    
+                }
+                else
+                {
+                    Game resObj = new Game();
+                    resObj.league = objs[i].L;
+                    resObj.startTimeUTC = objs[i].S;
+                    resObj.updTImeUTC = (int)(DateTime.UtcNow - utcHelper).TotalSeconds;
+
+                    resObj.teams[0].name = objs[i].O1;
+                    resObj.teams[1].name = objs[i].O2;
+                }                
+            }
             //
 
-            File.WriteAllText("1234.txt", mass);
+            File.WriteAllText("12.txt", serializer.Serialize(Program.games));
         }
 
     }

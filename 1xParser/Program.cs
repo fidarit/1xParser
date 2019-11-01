@@ -36,8 +36,8 @@ namespace _1xParser
                     Utilites.cMsg("Starting Telegram messages updater");
                     Telegram.StartMsgUpd();
 
-                    //Parser.ParseLine();
-                    //Parser.ParseLive();
+                    Parser.ParseLine();
+                    Parser.ParseLive();
 
                     Thread.Sleep(10000);
                     return 1;

@@ -49,22 +49,26 @@ namespace _1xParser
                     {
                         for (int i = 0; i < obj.result.Length; i++)
                         {
-                            if(obj.result[i].message.message_id > Params.lastUMid)
+                            int id = obj.result[i].message.from.id;
+                            if (obj.result[i].message.message_id > Params.lastUMid)
                                 switch (obj.result[i].message.text)
                                 {
                                     case "/start":
-                                        if (!Params.users.Contains(obj.result[i].message.from.id))
-                                            Params.users.Add(obj.result[i].message.from.id);
+                                        if (Params.users.Contains(id))
+                                        {
+                                            SendMessage("Для вас уже включена рассылка", id);
+                                        }
+                                        else
+                                        {
+                                            Params.users.Add(id);
+                                            SendMessage("Теперь вы будете получать рассылку", id);
+                                        }
                                         break;
                                     case "/stop":
-                                        Params.users.Remove(obj.result[i].message.from.id);
+                                        Params.users.Remove(id);
+                                        SendMessage("Теперь вы не будете получать рассылку", id);
                                         break;
                                 }
-
-                                
-                                else if (obj.result[i].message.text == "/stop"
-                                    && Params.users.Contains(obj.result[i].message.from.id))
-                                    Params.users.Remove(obj.result[i].message.from.id);
                         }
                         Params.lastUMid = obj.result[obj.result.Length - 1].message.message_id;
                     }

@@ -17,6 +17,22 @@ namespace _1xParser
         static bool taskStarted = false;
         public static bool doOtherThreads = true;
         public static Thread taskThread;
+        public static Thread parsingThread;
+
+        static DateTime lastParseTime = DateTime.MinValue;
+        public static void StartLineParsing()
+        {
+            parsingThread = new Thread(lineParsing);
+            parsingThread.Start();
+        }
+        static void lineParsing()
+        {
+            while (doOtherThreads)
+            {
+                Parser.ParseLine();
+                Thread.Sleep(300000);
+            }
+        }
         public static void AddTask(Task task)
         {
             tasks.Add(task);
@@ -34,7 +50,7 @@ namespace _1xParser
                 {
                     taskStarted = true;
 
-                    int sleepTime = tasks[0].dt.Millisecond - DateTime.Now.Millisecond;
+                    int sleepTime = (int)(tasks[0].dt - DateTime.Now).TotalMilliseconds;
                     if (sleepTime > 10000) Thread.Sleep(sleepTime);
 
                     tasks[0].func(tasks[0].gameID);
