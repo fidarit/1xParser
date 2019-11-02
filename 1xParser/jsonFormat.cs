@@ -52,7 +52,7 @@
         public float C { get; set; }
         public int G { get; set; }
         public int T { get; set; }
-        public float P { get; set; }
+        public double P { get; set; }
     }
 
     public class MI

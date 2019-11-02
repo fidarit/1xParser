@@ -4,42 +4,80 @@ using System.Threading;
 
 namespace _1xParser
 {
-    delegate void taskFunc(ulong id);
     struct Task
     {
-        public DateTime dt { get; set; }
-        public ulong gameID { get; set; }
-        public taskFunc func { get; set; }
+        public int dt { get; set; }
+        public long gameID { get; set; }
+        public Action<long> func { get; set; }
     }
     static class tasksMgr
     {
         static List<Task> tasks = new List<Task>();
         static bool taskStarted = false;
+        static bool parsingStarted = false;
+        static EventWaitHandle parsingThrEv = new EventWaitHandle(false, EventResetMode.ManualReset);
         public static bool doOtherThreads = true;
         public static Thread taskThread;
         public static Thread parsingThread;
+        public static Thread paramsSavingThread;
 
-        static DateTime lastParseTime = DateTime.MinValue;
         public static void StartLineParsing()
         {
-            parsingThread = new Thread(lineParsing);
-            parsingThread.Start();
-        }
-        static void lineParsing()
-        {
-            while (doOtherThreads)
+            if (!parsingStarted)
             {
-                Parser.ParseLine();
-                Thread.Sleep(300000);
+                if (parsingThread == null) parsingThread = new Thread(lineParsing);
+                else parsingThrEv.Set();
+                if (!parsingThread.IsAlive) parsingThread.Start();
             }
         }
         public static void AddTask(Task task)
         {
             tasks.Add(task);
+            tasks.Sort((a, b) => a.dt.CompareTo(b.dt));
             if (!taskStarted)
             {
                 if(taskThread == null) taskThread = new Thread(doIt);
                 taskThread.Start();
+            }
+        }
+        public static void StartParamsSaving()
+        {
+            paramsSavingThread = new Thread(paramsSaving);
+            paramsSavingThread.Start();
+        }
+        static void lineParsing()
+        {
+            try
+            {
+                while (doOtherThreads)
+                {
+                    parsingStarted = true;
+
+                    Parser.ParseLine();
+
+                    parsingStarted = false;
+                    parsingThrEv.WaitOne(300000);
+                }
+            }
+            catch (Exception e)
+            {
+                Utilites.cError(e.Message);
+            }
+        }
+        static void paramsSaving()
+        {
+            try
+            {
+                while (doOtherThreads)
+                {
+                    Params.SaveParams();
+
+                    Thread.Sleep(6000000); //10 min
+                }
+            }
+            catch (Exception e)
+            {
+                Utilites.cError(e.Message);
             }
         }
         static void doIt()
@@ -50,10 +88,13 @@ namespace _1xParser
                 {
                     taskStarted = true;
 
-                    int sleepTime = (int)(tasks[0].dt - DateTime.Now).TotalMilliseconds;
-                    if (sleepTime > 10000) Thread.Sleep(sleepTime);
+                    int sleepTime = (int)(tasks[0].dt - DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds);
+                    if (sleepTime > 1000) Thread.Sleep(sleepTime);
 
-                    tasks[0].func(tasks[0].gameID);
+                    if (tasks[0].func != null)
+                        tasks[0].func(tasks[0].gameID);
+                    else
+                        parsingThrEv.Set();
 
                     tasks.RemoveAt(0);
                     taskStarted = false;

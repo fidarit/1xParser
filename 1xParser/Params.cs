@@ -8,7 +8,9 @@ namespace _1xParser
     static class Params
     {
         static m_Params m_params;
+        static m_Params lastSavedParams;
         const string paramsFile = "params.xml";
+        const string backupDir = "Backups";
 
         public static string telegToken
         {
@@ -41,15 +43,32 @@ namespace _1xParser
             {
                 try
                 {
-                    using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
+                    using (FileStream fs = new FileStream(paramsFile, FileMode.Open))
                     {
                         XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
                         m_params = (m_Params)formatter.Deserialize(fs);
+                    }
+                    using (FileStream fs = new FileStream(paramsFile, FileMode.Open))
+                    {
+                        XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
+                        lastSavedParams = (m_Params)formatter.Deserialize(fs);
                     }
                     return true;
                 }
                 catch(Exception e)
                 {
+                    if (Directory.Exists(backupDir))
+                    {
+                        List<string> files = new List<string>(Directory.GetFiles(backupDir, "*.xml.*"));
+
+                        if (files.Count > 0)
+                        {
+                            files.Sort((a, b) => a.CompareTo(b));
+                            files.Reverse();
+
+                            File.Move(files[0], paramsFile);
+                        }
+                    }
                     Utilites.cError(e.Message);
                     return false;
                 }
@@ -57,17 +76,62 @@ namespace _1xParser
             else
             {
                 m_params = new m_Params();
+                SaveParams();
+
+                lastSavedParams = m_params;
                 return false;
             }
         }
         public static void SaveParams()
         {
-            using (FileStream fs = new FileStream("params.xml", FileMode.OpenOrCreate))
+            if (lastSavedParams == m_params)
+                return;
+            
+            Utilites.cMsg("Saving Settings");
+            if (File.Exists(paramsFile))
+            {
+                string backupFile = backupDir + "/" + paramsFile + ".";
+                Directory.CreateDirectory(backupDir);
+
+                List<string> files = new List<string>(Directory.GetFiles(backupDir, "*.xml.*"));
+
+                if (files.Count > 9)
+                {
+                    backupFile += "9";
+                    if (File.Exists(backupFile))
+                        File.Delete(backupFile);
+                }
+                else
+                {
+                    string last = "";
+
+                    if (files.Count > 0)
+                    {
+                        files.Sort((a, b) => a.CompareTo(b));
+                        files.Reverse();
+                        last = files[0].Remove(0, files[0].LastIndexOf(".") + 1);
+                    }
+
+                    if (!int.TryParse(last, out int lastInt))
+                    {
+                        backupFile += "0";
+                    }
+                    else
+                    {
+                        backupFile += lastInt + 1;
+                    }
+                }
+
+                File.Move(paramsFile, backupFile);
+            }
+
+            using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
             {
                 XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
                 formatter.Serialize(fs, m_params);
-            }
 
+                lastSavedParams = m_params;
+            }
         }
     }
     [Serializable]

@@ -10,7 +10,7 @@ namespace _1xParser
 
         public static int SendMessage(string text, int targetID)
         {
-            string ret = Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/sendMessage" +
+            Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/sendMessage" +
                 "?chat_id=" + targetID + "&text=" + text + "&parse_mode=HTML");
 
             //JavaScriptSerializer serializer = new JavaScriptSerializer();
@@ -22,7 +22,7 @@ namespace _1xParser
         {
             for (int i = 0; i < Params.users.Count; i++)
             {
-                string ret = Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/sendMessage" +
+                Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/sendMessage" +
                     "?chat_id=" + Params.users[i] + "&text=" + text + "&parse_mode=HTML");
             }
 
@@ -51,6 +51,7 @@ namespace _1xParser
                         {
                             int id = obj.result[i].message.from.id;
                             if (obj.result[i].message.message_id > Params.lastUMid)
+                            {
                                 switch (obj.result[i].message.text)
                                 {
                                     case "/start":
@@ -65,14 +66,26 @@ namespace _1xParser
                                         }
                                         break;
                                     case "/stop":
-                                        Params.users.Remove(id);
-                                        SendMessage("Теперь вы не будете получать рассылку", id);
+                                        if (Params.users.Contains(id))
+                                        {
+                                            Params.users.Remove(id);
+                                            SendMessage("Теперь вы не будете получать рассылку", id);
+                                        }
+                                        else
+                                        {
+                                            SendMessage("Вы и так не получаете рассылку...", id);
+                                        }
+                                        break;
+                                    default:
+                                        SendMessageToAll("Извините, но пока я вас не понимаю...");
+                                        Utilites.cWarning(obj.result[i].message.from.first_name + " пишет: " + obj.result[i].message.text);
                                         break;
                                 }
+                            }
                         }
                         Params.lastUMid = obj.result[obj.result.Length - 1].message.message_id;
                     }
-                    Console.ReadLine();
+                    Thread.Sleep(1000);
                 }
                 catch (Exception e)
                 {

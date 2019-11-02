@@ -36,15 +36,19 @@ namespace _1xParser
                     Utilites.cMsg("Starting Telegram messages updater");
                     Telegram.StartMsgUpd();
 
-                    Parser.ParseLine();
+                    tasksMgr.StartLineParsing();
+
                     Parser.ParseLive();
 
-                    Thread.Sleep(10000);
-                    return 1;
+                    //Thread.Sleep((int)TimeSpan.FromHours(12).TotalMilliseconds); //Restart program every 12 hours
                 }
                 catch(Exception e)
                 {
-                    Utilites.cError(e.Message);
+                    Utilites.cError(e.Message);                    
+                }
+                finally
+                {
+                    Close();
                 }
             }
             return 0;
@@ -60,6 +64,12 @@ namespace _1xParser
                 else if (tasksMgr.taskThread.IsAlive)
                     tasksMgr.taskThread.Abort();
 
+            if (tasksMgr.parsingThread != null)
+                if (tasksMgr.parsingThread.ThreadState == ThreadState.WaitSleepJoin)
+                    tasksMgr.parsingThread.Interrupt();
+                else if (tasksMgr.parsingThread.IsAlive)
+                    tasksMgr.parsingThread.Abort();
+
             if (Telegram.msgUpdThread != null)
                 if (Telegram.msgUpdThread.ThreadState == ThreadState.WaitSleepJoin)
                     Telegram.msgUpdThread.Interrupt();
@@ -68,7 +78,6 @@ namespace _1xParser
 
             Telegram.msgUpdThread.Join();
 
-            Utilites.cMsg("Saving Settings");
             Params.SaveParams();
 
             Utilites.cMsg("Closing");

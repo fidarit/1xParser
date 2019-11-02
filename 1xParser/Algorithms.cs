@@ -10,27 +10,50 @@ namespace _1xParser
     {
         public static void FirstAlg(long id)
         {
-            while (true)
-            {
+            Parser.ParseLive();
+            Game game = Program.games[id];
+            int gameTime = (int)DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds - game.startTimeUTC;
 
-                Thread.Sleep(30000); //спать 30 сек
-            }
+            if (gameTime > 2700) //45 min
+                return;
+
+            Telegram.SendMessageToAll("	Алгоритм - \"Тотал Матча\""
+                + "Лига - \"" + game.league + "\""
+                + "Команда - \"" + 2 + "\""
+                + "Время - \"" + TimeSpan.FromSeconds(gameTime).ToString("") + "\""
+                + "Начальный тотал -  \"" + game.totalF + "\""
+                + "Сейчас тотал -  \"" + game.totalL + "\""
+                + "Разница тотала - \"" + (game.totalF - game.totalL).ToString() + "\""
+                + "Рекомендую - \"ТБ или ТМ\"");
+
+            tasksMgr.AddTask(new Task
+            {
+                dt = (int)DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                func = FirstAlg,
+                gameID = id
+            });
         }
         public static void SecondAlg(long id)
         {
-            while (true)
-            {
+            Parser.ParseLive();
 
-                Thread.Sleep(30000); //спать 30 сек
-            }
+            tasksMgr.AddTask(new Task
+            {
+                dt = (int)DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                func = SecondAlg,
+                gameID = id
+            });
         }
         public static void ThirdAlg(long id)
         {
-            while (true)
-            {
+            Parser.ParseLive();
 
-                Thread.Sleep(30000); //спать 30 сек
-            }
+            tasksMgr.AddTask(new Task
+            {
+                dt = (int)DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                func = ThirdAlg,
+                gameID = id
+            });
         }
     }
 }
