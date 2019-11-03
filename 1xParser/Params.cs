@@ -37,7 +37,7 @@ namespace _1xParser
             get { return m_params.proxyPort; }
             set { m_params.proxyPort = value; }
         }
-        public static bool LoadParams()
+        public static bool LoadParams(byte id = 0)
         {
             if (File.Exists(paramsFile))
             {
@@ -57,34 +57,46 @@ namespace _1xParser
                 }
                 catch(Exception e)
                 {
-                    if (Directory.Exists(backupDir))
-                    {
-                        List<string> files = new List<string>(Directory.GetFiles(backupDir, "*.xml.*"));
-
-                        if (files.Count > 0)
-                        {
-                            files.Sort((a, b) => a.CompareTo(b));
-                            files.Reverse();
-
-                            File.Move(files[0], paramsFile);
-                        }
-                    }
-                    Utilites.cError(e.Message);
-                    return false;
+                    Utilites.wrException(e);
+                    return loadBackup(id);
                 }
             }
             else
             {
-                m_params = new m_Params();
-                SaveParams();
+                if (loadBackup(id))
+                    return true;
+                else
+                {
+                    m_params = new m_Params();
+                    SaveParams();
+                }
 
                 lastSavedParams = m_params;
                 return false;
             }
         }
+        static bool loadBackup(byte id = 0)
+        {
+            if (Directory.Exists(backupDir) && id < 10)
+            {
+                List<string> files = new List<string>(Directory.GetFiles(backupDir, "*.xml.*"));
+
+                if (files.Count > 0)
+                {
+                    Utilites.cWarning("Loading Backup");
+                    files.Sort((a, b) => a.CompareTo(b));
+                    files.Reverse();
+
+                    File.Copy(files[id], paramsFile);
+                    id++;
+                    return LoadParams(id);
+                }
+            }
+            return false;
+        }
         public static void SaveParams()
         {
-            if (lastSavedParams == m_params)
+            if (lastSavedParams.Equals(m_params))
                 return;
             
             Utilites.cMsg("Saving Settings");
@@ -125,12 +137,14 @@ namespace _1xParser
                 File.Move(paramsFile, backupFile);
             }
 
+            XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
             using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
             {
-                XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
                 formatter.Serialize(fs, m_params);
-
-                lastSavedParams = m_params;
+            }
+            using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
+            {
+                lastSavedParams = (m_Params)formatter.Deserialize(fs);
             }
         }
     }

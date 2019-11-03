@@ -16,60 +16,56 @@ namespace _1xParser
                 return;
 
             Utilites.cMsg("Parsing Line Page");
-
-            string fURL = "https://1xstavka.ru/line/Handball/";
-            string mass = Utilites.GetHTML(fURL);
-            jsonFormats.RootObj[] objs;
-
-            Match match = Regex.Match(mass, @"<script[^>]*?>.*?SSR_DASHBOARD(.*?);.*?<\/script>");
-            if (match.Success)
-            {
-                mass = match.Groups[1].Value; //значение скобки рег выр
-            }
-
-            match = Regex.Match(mass, @"Value.*?:(\[.*\])");
-            if (match.Success)
-            {
-                mass = match.Groups[1].Value; //значение скобки рег выр
-            }
-
+            string strRes = Parse("https://1xstavka.ru/line/Handball/");
             JavaScriptSerializer serializer = new JavaScriptSerializer();
-            objs = serializer.Deserialize<jsonFormats.RootObj[]>(mass);
-
+            jsonFormats.LineRootObj[] objs;
+            try
+            {
+                objs = serializer.Deserialize<jsonFormats.LineRootObj[]>(strRes);
+            }
+            catch(Exception e)
+            {
+                Utilites.wrException(e);
+                return;
+            }
+            if (objs == null)
+                return;
+            
             for (int i = 0; i < objs.Length; i++)
             {
-                long id = objs[i].CI;
+                long id = objs[i].I;
                 Game resObj = Program.games.ContainsKey(id) ? Program.games[id] : new Game();
 
                 resObj.league = objs[i].L;
                 resObj.startTimeUTC = objs[i].S;
                 resObj.updTimeUTC = (int)(DateTime.UtcNow - utcHelper).TotalSeconds;
+                if (objs[i].E.Length < 9)
+                    continue;
                 resObj.totalF = objs[i].E[8].P;
 
                 resObj.teams[0].name = objs[i].O1;
                 resObj.teams[1].name = objs[i].O2;
-
-
-                Program.games[i] = resObj;
+                
+                Program.games[id] = resObj;
                 Task task = new Task();
                 task.gameID = id;
                 if(id == ID)
                 {
-                    task.dt = resObj.startTimeUTC + 600; //10 min
+                    task.timeUTC = resObj.startTimeUTC + 600; //10 min
                     task.func = Algorithms.FirstAlg;
                     tasksMgr.AddTask(task);
-
-                    task.dt = resObj.startTimeUTC + 300; //5 min
+                    /*
+                    task.timeUTC = resObj.startTimeUTC + 300; //5 min
                     task.func = Algorithms.SecondAlg;
                     tasksMgr.AddTask(task);
 
-                    task.dt = resObj.startTimeUTC + 1800; //30 min
+                    task.timeUTC = resObj.startTimeUTC + 1800; //30 min
                     task.func = Algorithms.ThirdAlg;
-                    tasksMgr.AddTask(task);
+                    tasksMgr.AddTask(task);*/
                 }
                 else
                 {
-                    task.dt = resObj.startTimeUTC - 60;
+                    task.timeUTC = resObj.startTimeUTC - 60;
                     task.func = ParseLine;
                     tasksMgr.AddTask(task);
                 }
@@ -77,7 +73,6 @@ namespace _1xParser
             //
 
             lastLNParseTime = DateTime.Now;
-            File.WriteAllText("1.txt", serializer.Serialize(Program.games.Values));
         }
 
         public static void ParseLive()
@@ -86,31 +81,24 @@ namespace _1xParser
                 return;
 
             Utilites.cMsg("Parsing Live Page");
-
-            string fURL = "https://1xstavka.ru/live/Handball/";
-            string mass = Utilites.GetHTML(fURL);
-            jsonFormats.RootObj[] objs;
-
-            Match match = Regex.Match(mass, @"<script[^>]*?>.*?SSR_DASHBOARD(.*?);.*?<\/script>");
-            if (match.Success)
-            {
-                mass = match.Groups[1].Value; //значение скобки рег выр
-            }
-
-            match = Regex.Match(mass, @"Value.*?:(\[.*\])");
-            if (match.Success)
-            {
-                mass = match.Groups[1].Value; //значение скобки рег выр
-            }
-            if (mass.Length < 10) return;
-            //Utilites.cMsg(mass);
-
+            string strRes = Parse("https://1xstavka.ru/live/Handball/");
             JavaScriptSerializer serializer = new JavaScriptSerializer();
-            objs = serializer.Deserialize<jsonFormats.RootObj[]>(mass);
+            jsonFormats.LiveRootObj[] objs;
+            try
+            {
+                objs = serializer.Deserialize<jsonFormats.LiveRootObj[]>(strRes);
+            }
+            catch (Exception e)
+            {
+                Utilites.wrException(e);
+                return;
+            }
+            if (objs == null)
+                return;
 
             for (int i = 0; i < objs.Length; i++)
             {
-                long id = objs[i].CI;
+                long id = objs[i].I;
                 if (!Program.games.ContainsKey(id))
                     continue;
                 Game resObj = Program.games[id];
@@ -118,19 +106,45 @@ namespace _1xParser
                 resObj.league = objs[i].L;
                 resObj.startTimeUTC = objs[i].S;
                 resObj.updTimeUTC = (int)(DateTime.UtcNow - utcHelper).TotalSeconds;
+                if (objs[i].E.Length < 9)
+                    continue;
                 resObj.totalL = objs[i].E[8].P;
 
                 resObj.teams[0].name = objs[i].O1;
                 resObj.teams[1].name = objs[i].O2;
 
 
-                Program.games[i] = resObj;
+                Program.games[id] = resObj;
             }
             //
 
             lastLVParseTime = DateTime.Now;
-            File.WriteAllText("12.txt", serializer.Serialize(Program.games.Values));
         }
+        static string Parse(string url)
+        {
+            string mass = Utilites.GetHTML(url);
 
+            try
+            {
+                Match match = Regex.Match(mass, @"<script[^>]*?>.*?SSR_DASHBOARD(.*?);.*?<\/script>");
+                if (match.Groups.Count > 0)
+                {
+                    mass = match.Groups[1].Value; //значение скобки рег выр
+                }
+
+                match = Regex.Match(mass, @"Value.*?:(\[.*\])");
+                if (match.Groups.Count > 0)
+                {
+                    mass = match.Groups[1].Value; //значение скобки рег выр
+                }
+
+                return mass;
+            }
+            catch (Exception e)
+            {
+                Utilites.wrException(e);
+                return null;
+            }
+        }
     }
 }

@@ -32,19 +32,18 @@ namespace _1xParser
                         Console.ReadKey();
                         return -1;
                     }
+                    Utilites.cMsg("Press Ctrl + C to settings saving");
 
                     Utilites.cMsg("Starting Telegram messages updater");
                     Telegram.StartMsgUpd();
 
                     tasksMgr.StartLineParsing();
 
-                    Parser.ParseLive();
-
-                    //Thread.Sleep((int)TimeSpan.FromHours(12).TotalMilliseconds); //Restart program every 12 hours
+                    Thread.Sleep((int)TimeSpan.FromHours(6).TotalMilliseconds); //Restart program every 6 hours
                 }
                 catch(Exception e)
                 {
-                    Utilites.cError(e.Message);                    
+                    Utilites.wrException(e);                    
                 }
                 finally
                 {
@@ -71,12 +70,14 @@ namespace _1xParser
                     tasksMgr.parsingThread.Abort();
 
             if (Telegram.msgUpdThread != null)
+            {
                 if (Telegram.msgUpdThread.ThreadState == ThreadState.WaitSleepJoin)
                     Telegram.msgUpdThread.Interrupt();
                 else if (Telegram.msgUpdThread.IsAlive && !Telegram.msgUpdThread.Join(2500))
                     Telegram.msgUpdThread.Abort();
 
-            Telegram.msgUpdThread.Join();
+                Telegram.msgUpdThread.Join();
+            }
 
             Params.SaveParams();
 
@@ -116,6 +117,9 @@ namespace _1xParser
                     doItAll = false;
                     Close();
                     Thread.Sleep(1500);
+                    return true;
+                case CtrlTypes.CTRL_C_EVENT:
+                    Params.SaveParams();
                     return true;
                 default:
                     return false;

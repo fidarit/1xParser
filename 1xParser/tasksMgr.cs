@@ -6,7 +6,7 @@ namespace _1xParser
 {
     struct Task
     {
-        public int dt { get; set; }
+        public int timeUTC { get; set; }
         public long gameID { get; set; }
         public Action<long> func { get; set; }
     }
@@ -25,7 +25,11 @@ namespace _1xParser
         {
             if (!parsingStarted)
             {
-                if (parsingThread == null) parsingThread = new Thread(lineParsing);
+                if (parsingThread == null)
+                {
+                    parsingThread = new Thread(lineParsing);
+                    parsingThread.Name += " Line Parsing Thread";
+                }
                 else parsingThrEv.Set();
                 if (!parsingThread.IsAlive) parsingThread.Start();
             }
@@ -33,16 +37,21 @@ namespace _1xParser
         public static void AddTask(Task task)
         {
             tasks.Add(task);
-            tasks.Sort((a, b) => a.dt.CompareTo(b.dt));
+            tasks.Sort((a, b) => a.timeUTC.CompareTo(b.timeUTC));
             if (!taskStarted)
             {
-                if(taskThread == null) taskThread = new Thread(doIt);
-                taskThread.Start();
+                if (taskThread == null)
+                {
+                    taskThread = new Thread(doIt);
+                    taskThread.Name += " Task Thread";
+                }
+                if (!taskThread.IsAlive) taskThread.Start();
             }
         }
         public static void StartParamsSaving()
         {
             paramsSavingThread = new Thread(paramsSaving);
+            paramsSavingThread.Name += " Settings Saving Thread";
             paramsSavingThread.Start();
         }
         static void lineParsing()
@@ -61,7 +70,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.cError(e.Message);
+                Utilites.wrException(e);
             }
         }
         static void paramsSaving()
@@ -77,7 +86,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.cError(e.Message);
+                Utilites.wrException(e);
             }
         }
         static void doIt()
@@ -88,7 +97,7 @@ namespace _1xParser
                 {
                     taskStarted = true;
 
-                    int sleepTime = (int)(tasks[0].dt - DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds);
+                    int sleepTime = (int)(tasks[0].timeUTC - DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds);
                     if (sleepTime > 1000) Thread.Sleep(sleepTime);
 
                     if (tasks[0].func != null)
@@ -103,7 +112,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.cError(e.Message);
+                Utilites.wrException(e);
             }
         }
     }

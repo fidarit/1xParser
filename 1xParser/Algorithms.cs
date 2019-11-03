@@ -17,21 +17,30 @@ namespace _1xParser
             if (gameTime > 2700) //45 min
                 return;
 
-            Telegram.SendMessageToAll("	Алгоритм - \"Тотал Матча\""
-                + "Лига - \"" + game.league + "\""
-                + "Команда - \"" + 2 + "\""
-                + "Время - \"" + TimeSpan.FromSeconds(gameTime).ToString("") + "\""
-                + "Начальный тотал -  \"" + game.totalF + "\""
-                + "Сейчас тотал -  \"" + game.totalL + "\""
-                + "Разница тотала - \"" + (game.totalF - game.totalL).ToString() + "\""
-                + "Рекомендую - \"ТБ или ТМ\"");
-
             tasksMgr.AddTask(new Task
             {
-                dt = (int)DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                timeUTC = (int)DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds + 30,
                 func = FirstAlg,
                 gameID = id
             });
+
+            double deltaTotal = game.totalF - game.totalL;
+            string rec = "";
+            if (deltaTotal >= 8)
+                rec = "ТБ";
+            else if (deltaTotal <= 7)
+                rec = "ТМ";
+            else
+                return;
+
+            Telegram.SendMessageToAll("Алгоритм - \"Тотал Матча\""
+                + "<br />Лига - \"" + game.league + "\""
+                + "<br />Команда - \"" + 2 + "\""
+                + "<br />Время - \"" + TimeSpan.FromSeconds(gameTime).ToString("") + "\""
+                + "<br />Начальный тотал -  \"" + game.totalF + "\""
+                + "<br />Сейчас тотал -  \"" + game.totalL + "\""
+                + "<br />Разница тотала - \"" + deltaTotal + "\""
+                + "<br />Рекомендую - \"" + rec + "\"");
         }
         public static void SecondAlg(long id)
         {
@@ -39,7 +48,7 @@ namespace _1xParser
 
             tasksMgr.AddTask(new Task
             {
-                dt = (int)DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                timeUTC = (int)DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds + 30,
                 func = SecondAlg,
                 gameID = id
             });
@@ -50,7 +59,7 @@ namespace _1xParser
 
             tasksMgr.AddTask(new Task
             {
-                dt = (int)DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                timeUTC = (int)DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds + 30,
                 func = ThirdAlg,
                 gameID = id
             });

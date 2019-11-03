@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Web;
 using System.Web.Script.Serialization;
 
 namespace _1xParser
@@ -10,6 +11,8 @@ namespace _1xParser
 
         public static int SendMessage(string text, int targetID)
         {
+            Utilites.cWarning(text);
+            string eText = HttpUtility.UrlEncode(text);
             Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/sendMessage" +
                 "?chat_id=" + targetID + "&text=" + text + "&parse_mode=HTML");
 
@@ -22,8 +25,7 @@ namespace _1xParser
         {
             for (int i = 0; i < Params.users.Count; i++)
             {
-                Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/sendMessage" +
-                    "?chat_id=" + Params.users[i] + "&text=" + text + "&parse_mode=HTML");
+                SendMessage(text, Params.users[i]);
             }
 
             //Utilites.cMsg(ret);
@@ -41,10 +43,9 @@ namespace _1xParser
             {
                 try
                 {
-                    string ret = Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/getUpdates");
-                    jsonFormats.GetUpdResRoot obj;
+                    string ret = Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/getUpdates?offset=" + (Params.lastUMid + 1).ToString());
+                    jsonFormats.GetUpdResRoot obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
 
-                    obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
                     if (obj != null && obj.ok && obj.result.Length > 0)
                     {
                         for (int i = 0; i < obj.result.Length; i++)
@@ -85,11 +86,11 @@ namespace _1xParser
                         }
                         Params.lastUMid = obj.result[obj.result.Length - 1].message.message_id;
                     }
-                    Thread.Sleep(1000);
+                    Thread.Sleep(1250);
                 }
                 catch (Exception e)
                 {
-                    Utilites.cError(e.Message);
+                    Utilites.wrException(e);
                 }
             }
         }

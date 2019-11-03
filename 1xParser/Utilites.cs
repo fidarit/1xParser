@@ -9,17 +9,31 @@ namespace _1xParser
     {
         public static string GetHTML(string url)
         {
-            string line;
-            WebClient client = new WebClient();
-            client.Encoding = Encoding.GetEncoding(1251);
-            client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-            Stream data = client.OpenRead(url);
-            StreamReader reader = new StreamReader(data, Encoding.UTF8);
-            line = reader.ReadToEnd();
-            data.Close();
-            reader.Close();
+            try
+            {
+                string line = "";
+                WebClient client = new WebClient();
+                client.Encoding = Encoding.GetEncoding(1251);
+                client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+                Stream data = client.OpenRead(url);
+                StreamReader reader = new StreamReader(data, Encoding.UTF8);
+                line = reader.ReadToEnd();
+                data.Close();
+                reader.Close();
 
-            return line;
+                return line;
+            }
+            catch (Exception e)
+            {
+                wrException(e);
+                return "";
+            }
+        }
+        public static void wrException(Exception e)
+        {
+            if(!e.StackTrace.Contains("Thread"))
+                cError(e.StackTrace.Replace(" в ", Environment.NewLine + "\t в "));
+            cError(e.Message);
         }
         public static void cWarning(string msg)
         {
@@ -38,8 +52,8 @@ namespace _1xParser
         }
         static void writeL(string msg)
         {
-            Console.WriteLine(System.DateTime.Now.ToShortDateString() + " "
-                + System.DateTime.Now.ToLongTimeString() + " " + msg);
+            Console.WriteLine(DateTime.Now.ToShortDateString() + " "
+                + DateTime.Now.ToLongTimeString() + " " + msg);
         }
         public static string GET(string url)
         {
@@ -58,7 +72,7 @@ namespace _1xParser
             }
             catch(Exception e)
             {
-                Utilites.cError(e.Message);
+                Utilites.wrException(e);
             }
             return Out;
         }
