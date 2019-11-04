@@ -13,13 +13,12 @@ namespace _1xParser
             Parser.ParseLive();
             Game game = Program.games[id];
 
-            if (game.updTimeUTC + 30 < DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds 
-                || game.gameTime > 2700) //45 min
+            if (game.updTimeUNIX + 30 < Utilites.NowUNIX() || game.gameTime > 2700) //45 min
                 return;
 
             tasksMgr.AddTask(new Task
             {
-                timeUTC = (int)DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                timeUNIX = Utilites.NowUNIX() + 30,
                 func = FirstAlg,
                 gameID = id
             });
@@ -36,7 +35,7 @@ namespace _1xParser
             Telegram.SendMessageToAll("Алгоритм - \"Тотал Матча\""
                 + "<br />Лига - \"" + game.league + "\""
                 + "<br />Команда - \"" + game.teams[0].name + " - " + game.teams[1].name + "\""
-                + "<br />Время - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\:ss") + "\""
+                + "<br />Время - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
                 + "<br />Начальный тотал -  \"" + game.totalF + "\""
                 + "<br />Сейчас тотал -  \"" + game.totalL + "\""
                 + "<br />Разница тотала - \"" + deltaTotal + "\""
@@ -47,13 +46,12 @@ namespace _1xParser
             Parser.ParseLive();
             Game game = Program.games[id];
 
-            if (game.updTimeUTC + 30 < DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds
-                || game.gameTime > 1200) //20 min
+            if (game.updTimeUNIX + 30 < Utilites.NowUNIX() || game.gameTime > 1200) //20 min
                 return;
             
             tasksMgr.AddTask(new Task
             {
-                timeUTC = (int)DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                timeUNIX = Utilites.NowUNIX() + 30,
                 func = SecondAlg,
                 gameID = id
             });
@@ -84,7 +82,7 @@ namespace _1xParser
 
             tasksMgr.AddTask(new Task
             {
-                timeUTC = (int)DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds + 30,
+                timeUNIX = Utilites.NowUNIX() + 30,
                 func = ThirdAlg,
                 gameID = id
             });

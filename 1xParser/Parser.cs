@@ -7,10 +7,9 @@ namespace _1xParser
 {
     static class Parser
     {
-        private static DateTime utcHelper = new DateTime(1970, 1, 1);
         private static DateTime lastLNParseTime = DateTime.MinValue;
         private static DateTime lastLVParseTime = DateTime.MinValue;
-        public static void ParseLine(long ID = 0)
+        public static void ParseLine(long ID = -1)
         {
             if (lastLNParseTime.AddSeconds(15) > DateTime.Now)
                 return;
@@ -36,10 +35,10 @@ namespace _1xParser
             {
                 long id = objs[i].I;
                 Game resObj = Program.games.ContainsKey(id) ? Program.games[id] : new Game();
-
+                
                 resObj.league = objs[i].L;
-                resObj.startTimeUTC = objs[i].S;
-                resObj.updTimeUTC = (int)(DateTime.UtcNow - utcHelper).TotalSeconds;
+                resObj.startTimeUNIX = objs[i].S;
+                resObj.updTimeUNIX = Utilites.NowUNIX();
                 if (objs[i].E.Length < 9)
                     continue;
                 resObj.totalF = objs[i].E[8].P;
@@ -52,22 +51,22 @@ namespace _1xParser
                 task.gameID = id;
                 if(id == ID)
                 {
-                    task.timeUTC = resObj.startTimeUTC + 600; //10 min
+                    task.timeUNIX = resObj.startTimeUNIX + 600; //10 min
                     task.func = Algorithms.FirstAlg;
                     tasksMgr.AddTask(task);
 
-                    task.timeUTC = resObj.startTimeUTC + 300; //5 min
+                    task.timeUNIX = resObj.startTimeUNIX + 300; //5 min
                     task.func = Algorithms.SecondAlg;
                     tasksMgr.AddTask(task);
 
                     /*
-                    task.timeUTC = resObj.startTimeUTC + 1800; //30 min
+                    task.timeUNIX = resObj.startTimeUNIX + 1800; //30 min
                     task.func = Algorithms.ThirdAlg;
                     tasksMgr.AddTask(task);*/
                 }
                 else
                 {
-                    task.timeUTC = resObj.startTimeUTC - 60;
+                    task.timeUNIX = resObj.startTimeUNIX - 60;
                     task.func = ParseLine;
                     tasksMgr.AddTask(task);
                 }
@@ -107,8 +106,8 @@ namespace _1xParser
                 Game resObj = Program.games[id];
 
                 resObj.league = objs[i].L;
-                resObj.startTimeUTC = objs[i].S;
-                resObj.updTimeUTC = (int)(DateTime.UtcNow - utcHelper).TotalSeconds;
+                resObj.startTimeUNIX = objs[i].S;
+                resObj.updTimeUNIX = Utilites.NowUNIX();
                 resObj.gameTime = objs[i].SC.TS;
                 if (objs[i].E.Length < 9)
                     continue;

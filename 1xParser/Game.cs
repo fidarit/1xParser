@@ -9,8 +9,8 @@ namespace _1xParser
     [Serializable]
     class Game
     {
-        public int startTimeUTC;
-        public int updTimeUTC;
+        public int startTimeUNIX;
+        public int updTimeUNIX;
         public int gameTime;
         public string league;
         public double totalF;

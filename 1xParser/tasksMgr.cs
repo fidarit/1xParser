@@ -6,7 +6,7 @@ namespace _1xParser
 {
     struct Task
     {
-        public int timeUTC { get; set; }
+        public int timeUNIX { get; set; }
         public long gameID { get; set; }
         public Action<long> func { get; set; }
     }
@@ -37,7 +37,7 @@ namespace _1xParser
         public static void AddTask(Task task)
         {
             tasks.Add(task);
-            tasks.Sort((a, b) => a.timeUTC.CompareTo(b.timeUTC));
+            tasks.Sort((a, b) => a.timeUNIX.CompareTo(b.timeUNIX));
             if (taskThread == null || !taskThread.IsAlive)
             {
                 taskThread = new Thread(doIt);
@@ -94,8 +94,8 @@ namespace _1xParser
                 {
                     taskStarted = true;
 
-                    int sleepTime = (int)(tasks[0].timeUTC - DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds);
-                    if (sleepTime > 1000) Thread.Sleep(sleepTime);
+                    int sleepTime = tasks[0].timeUNIX - Utilites.NowUNIX();
+                    if (sleepTime > 0) Thread.Sleep(sleepTime * 1000);
 
                     try
                     {

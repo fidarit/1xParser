@@ -7,6 +7,10 @@ namespace _1xParser
 {
     static class Utilites
     {
+        public static int NowUNIX()
+        {
+            return (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+        }
         public static string GetHTML(string url)
         {
             try
