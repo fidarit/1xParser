@@ -11,6 +11,7 @@ namespace _1xParser
     {
         public int startTimeUTC;
         public int updTimeUTC;
+        public int gameTime;
         public string league;
         public double totalF;
         public double totalL;

@@ -26,6 +26,7 @@ namespace _1xParser
             catch(Exception e)
             {
                 Utilites.wrException(e);
+                File.WriteAllText("321.txt", strRes);
                 return;
             }
             if (objs == null)
@@ -54,11 +55,12 @@ namespace _1xParser
                     task.timeUTC = resObj.startTimeUTC + 600; //10 min
                     task.func = Algorithms.FirstAlg;
                     tasksMgr.AddTask(task);
-                    /*
+
                     task.timeUTC = resObj.startTimeUTC + 300; //5 min
                     task.func = Algorithms.SecondAlg;
                     tasksMgr.AddTask(task);
 
+                    /*
                     task.timeUTC = resObj.startTimeUTC + 1800; //30 min
                     task.func = Algorithms.ThirdAlg;
                     tasksMgr.AddTask(task);*/
@@ -91,6 +93,7 @@ namespace _1xParser
             catch (Exception e)
             {
                 Utilites.wrException(e);
+                File.WriteAllText("321live.txt", strRes);
                 return;
             }
             if (objs == null)
@@ -106,6 +109,7 @@ namespace _1xParser
                 resObj.league = objs[i].L;
                 resObj.startTimeUTC = objs[i].S;
                 resObj.updTimeUTC = (int)(DateTime.UtcNow - utcHelper).TotalSeconds;
+                resObj.gameTime = objs[i].SC.TS;
                 if (objs[i].E.Length < 9)
                     continue;
                 resObj.totalL = objs[i].E[8].P;

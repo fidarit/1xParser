@@ -38,14 +38,11 @@ namespace _1xParser
         {
             tasks.Add(task);
             tasks.Sort((a, b) => a.timeUTC.CompareTo(b.timeUTC));
-            if (!taskStarted)
+            if (taskThread == null || !taskThread.IsAlive)
             {
-                if (taskThread == null)
-                {
-                    taskThread = new Thread(doIt);
-                    taskThread.Name += " Task Thread";
-                }
-                if (!taskThread.IsAlive) taskThread.Start();
+                taskThread = new Thread(doIt);
+                taskThread.Name += " Task Thread";
+                taskThread.Start();
             }
         }
         public static void StartParamsSaving()
@@ -100,10 +97,18 @@ namespace _1xParser
                     int sleepTime = (int)(tasks[0].timeUTC - DateTime.UtcNow.Subtract(DateTime.MinValue).TotalSeconds);
                     if (sleepTime > 1000) Thread.Sleep(sleepTime);
 
-                    if (tasks[0].func != null)
-                        tasks[0].func(tasks[0].gameID);
-                    else
-                        parsingThrEv.Set();
+                    try
+                    {
+                        if (tasks[0].func != null)
+                            tasks[0].func(tasks[0].gameID);
+                        else
+                            parsingThrEv.Set();
+
+                    }
+                    catch (Exception e)
+                    {
+                        Utilites.wrException(e);
+                    }
 
                     tasks.RemoveAt(0);
                     taskStarted = false;

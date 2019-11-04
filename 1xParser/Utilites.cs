@@ -72,7 +72,7 @@ namespace _1xParser
             }
             catch(Exception e)
             {
-                Utilites.wrException(e);
+                wrException(e);
             }
             return Out;
         }

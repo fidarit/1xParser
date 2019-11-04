@@ -52,7 +52,7 @@
     {
         public int CP { get; set; }
         public string CPS { get; set; }
-        public FS FS { get; set; }
+        public object FS { get; set; }
         public int HC { get; set; }
         public P[] PS { get; set; }
         public ST[] ST { get; set; }
@@ -68,7 +68,7 @@
     public class P
     {
         public int Key { get; set; }
-        public Value Value { get; set; }
+        public object Value { get; set; }
     }
 
     public class Value
