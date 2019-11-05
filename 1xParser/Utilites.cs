@@ -48,9 +48,13 @@ namespace _1xParser
         }
         public static void LogException(Exception e)
         {
-            if(!e.StackTrace.Contains("Thread"))
+            if (e.Message.Contains("Thread") || e.Message.Contains("Поток"))
+                LogWarning(e.Message);
+            else
+            {
                 LogError(e.StackTrace.Replace(" в ", Environment.NewLine + "\t в "));
-            LogError(e.Message);
+                LogError(e.Message);
+            }
         }
         public static void LogWarning(string msg)
         {

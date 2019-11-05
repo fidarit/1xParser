@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
+using System.Web.Script.Serialization;
 
 namespace _1xParser
 {
+    [Serializable]
     struct Task
     {
         public int TimeUNIX { get; set; }
@@ -13,6 +16,8 @@ namespace _1xParser
     static class TasksMgr
     {
         static readonly List<Task> tasks = new List<Task>();
+        static readonly object tasksLocker = new object();
+
         static bool parsingStarted = false;
         static readonly EventWaitHandle parsingThrEv = new EventWaitHandle(false, EventResetMode.ManualReset);
         public static bool doOtherThreads = true;
@@ -35,13 +40,23 @@ namespace _1xParser
         }
         public static void AddTask(Task task)
         {
-            tasks.Add(task);
-            tasks.Sort((a, b) => a.TimeUNIX.CompareTo(b.TimeUNIX));
-            if (taskThread == null || !taskThread.IsAlive)
+            lock (tasksLocker)
             {
-                taskThread = new Thread(DoIt);
-                taskThread.Name += " Task Thread";
-                taskThread.Start();
+                if(tasks.Count > 0 && task.TimeUNIX < tasks[0].TimeUNIX && taskThread != null
+                    && taskThread.ThreadState == ThreadState.WaitSleepJoin)
+                {
+                    taskThread.Abort();
+                    taskThread = null;
+                }
+                if (taskThread == null || taskThread.ThreadState != ThreadState.Running)
+                {
+                    taskThread = new Thread(DoIt);
+                    taskThread.Name += " Task Thread";
+                    taskThread.Start();
+                }
+
+                tasks.Add(task);
+                tasks.Sort((a, b) => a.TimeUNIX.CompareTo(b.TimeUNIX));
             }
         }
         public static void StartParamsSaving()
@@ -77,7 +92,7 @@ namespace _1xParser
                 {
                     Params.SaveParams();
 
-                    Thread.Sleep(6000000); //10 min
+                    Thread.Sleep(600000); //10 min
                 }
             }
             catch (Exception e)
@@ -91,13 +106,19 @@ namespace _1xParser
             {
                 while (doOtherThreads)
                 {
-                    int sleepTime = tasks[0].TimeUNIX - Utilites.NowUNIX();
+                    Task task;
+                    lock (tasksLocker)
+                    {
+                        task = tasks[0];
+                    }
+                    int sleepTime = task.TimeUNIX - Utilites.NowUNIX();
+
                     if (sleepTime > 0) Thread.Sleep(sleepTime * 1000);
 
                     try
                     {
-                        if (tasks[0].Func != null)
-                            tasks[0].Func(tasks[0].GameID);
+                        if (task.Func != null)
+                            task.Func(task.GameID);
                         else
                             parsingThrEv.Set();
 
@@ -107,8 +128,11 @@ namespace _1xParser
                         Utilites.LogException(e);
                     }
 
-                    tasks.RemoveAt(0);
-                    if (tasks.Count == 0) return;
+                    lock (tasksLocker)
+                    {
+                        tasks.RemoveAt(0);
+                        if (tasks.Count == 0) return;
+                    }
                 }
             }
             catch (Exception e)

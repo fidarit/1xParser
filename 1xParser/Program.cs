@@ -39,6 +39,9 @@ namespace _1xParser
                     Utilites.Log("Starting Telegram messages updater");
                     Telegram.StartMsgUpd();
 
+                  //  Parser.ParseLine();
+                    //Parser.ParseLive();
+
                     TasksMgr.StartLineParsing();
 
                     Thread.Sleep((int)TimeSpan.FromHours(6).TotalMilliseconds); //Restart program every 6 hours

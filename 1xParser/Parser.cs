@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web.Script.Serialization;
 
 namespace _1xParser
@@ -12,7 +13,7 @@ namespace _1xParser
         public static void ParseLine(long ID = -1)
         {
             if (lastLNParseTime.AddSeconds(15) > DateTime.Now)
-                return;
+                Thread.Sleep(11000);
 
             Utilites.Log("Parsing Line Page");
             string strRes = Parse("https://1xstavka.ru/line/Handball/");
@@ -25,7 +26,6 @@ namespace _1xParser
             catch(Exception e)
             {
                 Utilites.LogException(e);
-                File.WriteAllText("321.txt", strRes);
                 return;
             }
             if (objs == null)
@@ -39,7 +39,9 @@ namespace _1xParser
                 {
                     resObj = Program.games.ContainsKey(id) ? Program.games[id] : new Game();
                 }
-                
+                if (resObj.updTimeUNIX + 300 > Utilites.NowUNIX())
+                    continue;
+
                 resObj.league = objs[i].L;
                 resObj.startTimeUNIX = objs[i].S;
                 resObj.updTimeUNIX = Utilites.NowUNIX();
@@ -90,16 +92,21 @@ namespace _1xParser
                 }
                 else
                 {
+                    int rand = (int)(new Random().NextDouble() * 200);
                     Task task = new Task
                     {
                         GameID = id,
-                        TimeUNIX = resObj.startTimeUNIX - 60,
+                        TimeUNIX = resObj.startTimeUNIX - 300 + rand,
                         Func = ParseLine
                     };
                     TasksMgr.AddTask(task);
                 }
             }
             //
+
+            JavaScriptSerializer scriptSerializer = new JavaScriptSerializer();
+            File.WriteAllText("games.txt", scriptSerializer.Serialize(Program.games.Values));
+
 
             lastLNParseTime = DateTime.Now;
         }
@@ -120,7 +127,6 @@ namespace _1xParser
             catch (Exception e)
             {
                 Utilites.LogException(e);
-                File.WriteAllText("321live.txt", strRes);
                 return;
             }
             if (objs == null)
@@ -164,13 +170,7 @@ namespace _1xParser
 
             try
             {
-                Match match = Regex.Match(mass, @"<script[^>]*?>.*?SSR_DASHBOARD(.*?);.*?<\/script>");
-                if (match.Groups.Count > 0)
-                {
-                    mass = match.Groups[1].Value; //значение скобки рег выр
-                }
-
-                match = Regex.Match(mass, @"Value.*?:(\[.*\])");
+                Match match = Regex.Match(mass, '"' + "Value.*?:(\\[.*\\]).*SSR_TOP_SPORTS");
                 if (match.Groups.Count > 0)
                 {
                     mass = match.Groups[1].Value; //значение скобки рег выр
