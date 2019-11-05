@@ -7,32 +7,32 @@ namespace _1xParser
 {
     static class Params
     {
-        static m_Params m_params;
-        static m_Params lastSavedParams;
+        static ParamsObj m_params;
+        static ParamsObj lastSavedParams;
         const string paramsFile = "params.xml";
         const string backupDir = "Backups";
 
-        public static string telegToken
+        public static string TelegToken
         {
             get { return m_params.telegToken; }
             set { m_params.telegToken = value; }
         }
-        public static List<int> users
+        public static List<int> Users
         {
             get { return m_params.users; }
             set { m_params.users = value; }
         }
-        public static int lastUMid
+        public static int LastUMid
         {
             get { return m_params.lastUMid; }
             set { m_params.lastUMid = value; }
         }
-        public static string proxyIP
+        public static string ProxyIP
         {
             get { return m_params.proxyIP; }
             set { m_params.proxyIP = value; }
         }
-        public static int proxyPort
+        public static int ProxyPort
         {
             get { return m_params.proxyPort; }
             set { m_params.proxyPort = value; }
@@ -45,29 +45,38 @@ namespace _1xParser
                 {
                     using (FileStream fs = new FileStream(paramsFile, FileMode.Open))
                     {
-                        XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
-                        m_params = (m_Params)formatter.Deserialize(fs);
+                        XmlSerializer formatter = new XmlSerializer(typeof(ParamsObj));
+                        m_params = (ParamsObj)formatter.Deserialize(fs);
                     }
                     using (FileStream fs = new FileStream(paramsFile, FileMode.Open))
                     {
-                        XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
-                        lastSavedParams = (m_Params)formatter.Deserialize(fs);
+                        XmlSerializer formatter = new XmlSerializer(typeof(ParamsObj));
+                        lastSavedParams = (ParamsObj)formatter.Deserialize(fs);
                     }
                     return true;
                 }
                 catch(Exception e)
                 {
-                    Utilites.wrException(e);
-                    return loadBackup(id);
+                    int i = 0;
+                    string errFile = paramsFile + ".err";
+                    while (File.Exists(errFile + i))
+                    {
+                        i++;
+                        if (i > 9)
+                            break;
+                    }
+                    File.Move(paramsFile, errFile + i);
+                    Utilites.LogException(e);
+                    return LoadBackup(id);
                 }
             }
             else
             {
-                if (loadBackup(id))
+                if (LoadBackup(id))
                     return true;
                 else
                 {
-                    m_params = new m_Params();
+                    m_params = new ParamsObj();
                     SaveParams();
                 }
 
@@ -75,7 +84,7 @@ namespace _1xParser
                 return false;
             }
         }
-        static bool loadBackup(byte id = 0)
+        static bool LoadBackup(byte id = 0)
         {
             if (Directory.Exists(backupDir) && id < 10)
             {
@@ -83,7 +92,7 @@ namespace _1xParser
 
                 if (files.Count > 0)
                 {
-                    Utilites.cWarning("Loading Backup");
+                    Utilites.LogWarning("Loading Backup");
                     files.Sort((a, b) => a.CompareTo(b));
                     files.Reverse();
 
@@ -99,7 +108,7 @@ namespace _1xParser
             if (lastSavedParams.Equals(m_params))
                 return;
             
-            Utilites.cMsg("Saving Settings");
+            Utilites.Log("Saving Settings");
             if (File.Exists(paramsFile))
             {
                 string backupFile = backupDir + "/" + paramsFile + ".";
@@ -137,24 +146,24 @@ namespace _1xParser
                 File.Move(paramsFile, backupFile);
             }
 
-            XmlSerializer formatter = new XmlSerializer(typeof(m_Params));
+            XmlSerializer formatter = new XmlSerializer(typeof(ParamsObj));
             using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
             {
                 formatter.Serialize(fs, m_params);
             }
             using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
             {
-                lastSavedParams = (m_Params)formatter.Deserialize(fs);
+                lastSavedParams = (ParamsObj)formatter.Deserialize(fs);
             }
         }
     }
     [Serializable]
-    public class m_Params
+    public class ParamsObj
     {
         public string telegToken = "602929280:AAGde65bQYkgiqEZSD5eoJn2SSIvIOitg90";
         public List<int> users = new List<int>();
-        public int lastUMid = 0; //Last upd message id
-        public string proxyIP = "217.182.51.227";
-        public int proxyPort = 8080;
+        public int lastUMid = -1; //Last upd message id
+        public string proxyIP = "";
+        public int proxyPort = 0;
     }
 }

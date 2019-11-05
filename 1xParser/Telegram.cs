@@ -11,65 +11,65 @@ namespace _1xParser
 
         public static int SendMessage(string text, int targetID)
         {
-            Utilites.cWarning(text);
             string eText = HttpUtility.UrlEncode(text);
-            Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/sendMessage" +
-                "?chat_id=" + targetID + "&text=" + text + "&parse_mode=HTML");
+            DateTime time = DateTime.Now;
 
-            //JavaScriptSerializer serializer = new JavaScriptSerializer();
-            // objs = serializer.Deserialize<RootObj[]>(mass);
-            //Utilites.cMsg(ret);
+            Utilites.GET("https://api.telegram.org/bot" + Params.TelegToken + "/sendMessage" +
+                "?chat_id=" + targetID + "&text=" + text + "&parse_mode=HTML");
+            
+            int sleepTime = (int)(time.AddMilliseconds(33) - DateTime.Now).TotalMilliseconds;
+            if (sleepTime > 0) Thread.Sleep(sleepTime);
             return 0;
         }
         public static int SendMessageToAll(string text)
         {
-            for (int i = 0; i < Params.users.Count; i++)
+            for (int i = 0; i < Params.Users.Count; i++)
             {
-                SendMessage(text, Params.users[i]);
+                SendMessage(text, Params.Users[i]);
             }
 
-            //Utilites.cMsg(ret);
             return 0;
         }
         public static void StartMsgUpd()
         {
-            msgUpdThread = new Thread(msgUpd);
+            msgUpdThread = new Thread(MsgUpd);
             msgUpdThread.Start();
         }
-        static void msgUpd()
+        static void MsgUpd()
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
-            while (tasksMgr.doOtherThreads)
+            while (TasksMgr.doOtherThreads)
             {
                 try
                 {
-                    string ret = Utilites.GET("https://api.telegram.org/bot" + Params.telegToken + "/getUpdates?offset=" + (Params.lastUMid + 1).ToString());
+                    string ret = Utilites.GET("https://api.telegram.org/bot" + Params.TelegToken + "/getUpdates?offset=" + (Params.LastUMid + 1).ToString());
                     jsonFormats.GetUpdResRoot obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
 
-                    if (obj != null && obj.ok && obj.result.Length > 0)
+                    if (obj != null && obj.ok)
                     {
                         for (int i = 0; i < obj.result.Length; i++)
                         {
-                            int id = obj.result[i].message.from.id;
-                            if (obj.result[i].message.message_id > Params.lastUMid)
+                            jsonFormats.Result result = obj.result[i];
+                            int id = result.message.from.id;
+                            if (result.message.message_id > Params.LastUMid)
                             {
-                                switch (obj.result[i].message.text)
+                                switch (result.message.text)
                                 {
                                     case "/start":
-                                        if (Params.users.Contains(id))
+                                        if (Params.Users.Contains(id))
                                         {
                                             SendMessage("Для вас уже включена рассылка", id);
                                         }
                                         else
                                         {
-                                            Params.users.Add(id);
+                                            Params.Users.Add(id);
                                             SendMessage("Теперь вы будете получать рассылку", id);
                                         }
                                         break;
                                     case "/stop":
-                                        if (Params.users.Contains(id))
+                                        if (Params.Users.Contains(id))
                                         {
-                                            Params.users.Remove(id);
+                                            Params.Users.Remove(id);
                                             SendMessage("Теперь вы не будете получать рассылку", id);
                                         }
                                         else
@@ -79,18 +79,18 @@ namespace _1xParser
                                         break;
                                     default:
                                         SendMessageToAll("Извините, но пока я вас не понимаю...");
-                                        Utilites.cWarning(obj.result[i].message.from.first_name + " пишет: " + obj.result[i].message.text);
+                                        Utilites.LogWarning(result.message.from.first_name + " пишет: " + result.message.text);
                                         break;
                                 }
                             }
                         }
-                        Params.lastUMid = obj.result[obj.result.Length - 1].message.message_id;
+                        Params.LastUMid = obj.result[obj.result.Length - 1].message.message_id;
                     }
-                    Thread.Sleep(1250);
+                    Thread.Sleep(1500);
                 }
                 catch (Exception e)
                 {
-                    Utilites.wrException(e);
+                    Utilites.LogException(e);
                 }
             }
         }

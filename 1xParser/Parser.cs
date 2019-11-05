@@ -14,7 +14,7 @@ namespace _1xParser
             if (lastLNParseTime.AddSeconds(15) > DateTime.Now)
                 return;
 
-            Utilites.cMsg("Parsing Line Page");
+            Utilites.Log("Parsing Line Page");
             string strRes = Parse("https://1xstavka.ru/line/Handball/");
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             jsonFormats.LineRootObj[] objs;
@@ -24,7 +24,7 @@ namespace _1xParser
             }
             catch(Exception e)
             {
-                Utilites.wrException(e);
+                Utilites.LogException(e);
                 File.WriteAllText("321.txt", strRes);
                 return;
             }
@@ -34,7 +34,11 @@ namespace _1xParser
             for (int i = 0; i < objs.Length; i++)
             {
                 long id = objs[i].I;
-                Game resObj = Program.games.ContainsKey(id) ? Program.games[id] : new Game();
+                Game resObj;
+                lock (Program.gamesLocker)
+                {
+                    resObj = Program.games.ContainsKey(id) ? Program.games[id] : new Game();
+                }
                 
                 resObj.league = objs[i].L;
                 resObj.startTimeUNIX = objs[i].S;
@@ -45,30 +49,54 @@ namespace _1xParser
 
                 resObj.teams[0].name = objs[i].O1;
                 resObj.teams[1].name = objs[i].O2;
-                
-                Program.games[id] = resObj;
-                Task task = new Task();
-                task.gameID = id;
+
+                lock (Program.gamesLocker)
+                {
+                    Program.games[id] = resObj;
+                }
                 if(id == ID)
                 {
-                    task.timeUNIX = resObj.startTimeUNIX + 600; //10 min
-                    task.func = Algorithms.FirstAlg;
-                    tasksMgr.AddTask(task);
+                    if (objs[i].E[0].C <= 1.6)
+                        resObj.favTeam = 0;
+                    else if(objs[i].E[2].C <= 1.6)
+                        resObj.favTeam = 1;
 
-                    task.timeUNIX = resObj.startTimeUNIX + 300; //5 min
-                    task.func = Algorithms.SecondAlg;
-                    tasksMgr.AddTask(task);
+                    Task task = new Task
+                    {
+                        GameID = id,
+                        TimeUNIX = resObj.startTimeUNIX + 600, //10 min
+                        Func = Algorithms.FirstAlg
+                    };
+                    TasksMgr.AddTask(task);
 
-                    /*
-                    task.timeUNIX = resObj.startTimeUNIX + 1800; //30 min
-                    task.func = Algorithms.ThirdAlg;
-                    tasksMgr.AddTask(task);*/
+                    task = new Task
+                    {
+                        GameID = id,
+                        TimeUNIX = resObj.startTimeUNIX + 300, //5 min
+                        Func = Algorithms.SecondAlg
+                    };
+                    TasksMgr.AddTask(task);
+
+                    if (resObj.favTeam >= 0)
+                    {
+                        task = new Task
+                        {
+                            GameID = id,
+                            TimeUNIX = resObj.startTimeUNIX + 1800, //30 min
+                            Func = Algorithms.ThirdAlg
+                        };
+                        TasksMgr.AddTask(task);
+                    }
                 }
                 else
                 {
-                    task.timeUNIX = resObj.startTimeUNIX - 60;
-                    task.func = ParseLine;
-                    tasksMgr.AddTask(task);
+                    Task task = new Task
+                    {
+                        GameID = id,
+                        TimeUNIX = resObj.startTimeUNIX - 60,
+                        Func = ParseLine
+                    };
+                    TasksMgr.AddTask(task);
                 }
             }
             //
@@ -81,7 +109,7 @@ namespace _1xParser
             if (lastLVParseTime.AddSeconds(15) > DateTime.Now)
                 return;
 
-            Utilites.cMsg("Parsing Live Page");
+            Utilites.Log("Parsing Live Page");
             string strRes = Parse("https://1xstavka.ru/live/Handball/");
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             jsonFormats.LiveRootObj[] objs;
@@ -91,7 +119,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.wrException(e);
+                Utilites.LogException(e);
                 File.WriteAllText("321live.txt", strRes);
                 return;
             }
@@ -101,9 +129,13 @@ namespace _1xParser
             for (int i = 0; i < objs.Length; i++)
             {
                 long id = objs[i].I;
-                if (!Program.games.ContainsKey(id))
-                    continue;
-                Game resObj = Program.games[id];
+                Game resObj;
+                lock (Program.gamesLocker)
+                {
+                    if (!Program.games.ContainsKey(id))
+                        continue;
+                    resObj = Program.games[id];
+                }
 
                 resObj.league = objs[i].L;
                 resObj.startTimeUNIX = objs[i].S;
@@ -117,7 +149,10 @@ namespace _1xParser
                 resObj.teams[1].name = objs[i].O2;
 
 
-                Program.games[id] = resObj;
+                lock (Program.gamesLocker)
+                {
+                    Program.games[id] = resObj;
+                }
             }
             //
 
@@ -145,7 +180,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.wrException(e);
+                Utilites.LogException(e);
                 return null;
             }
         }

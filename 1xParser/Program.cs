@@ -8,9 +8,11 @@ namespace _1xParser
     class Program
     {
         public static Dictionary<long, Game> games;
+        public static readonly object gamesLocker = new object();
+
         static bool doItAll = true;
 
-        static int Main(string[] args)
+        static int Main()
         {
             SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
 
@@ -18,32 +20,32 @@ namespace _1xParser
             {
                 try
                 {
-                    Utilites.cMsg("Starting");
+                    Utilites.Log("Starting");
                     games = new Dictionary<long, Game>();
 
 
-                    Utilites.cMsg("Load Settings");
+                    Utilites.Log("Load Settings");
                     if (!Params.LoadParams())
                     {
-                        Utilites.cError("There is not settings file  - \"params.xml\"");
-                        Utilites.cWarning("Settings file created");
-                        Utilites.cWarning("Closing");
+                        Utilites.LogError("There is not settings file  - \"params.xml\"");
+                        Utilites.LogWarning("Settings file created");
+                        Utilites.LogWarning("Closing");
                         Console.WriteLine("Press any key to exit...");
                         Console.ReadKey();
                         return -1;
                     }
-                    Utilites.cMsg("Press Ctrl + C to settings saving");
+                    Utilites.Log("Press Ctrl + C to settings saving");
 
-                    Utilites.cMsg("Starting Telegram messages updater");
+                    Utilites.Log("Starting Telegram messages updater");
                     Telegram.StartMsgUpd();
 
-                    tasksMgr.StartLineParsing();
+                    TasksMgr.StartLineParsing();
 
                     Thread.Sleep((int)TimeSpan.FromHours(6).TotalMilliseconds); //Restart program every 6 hours
                 }
                 catch(Exception e)
                 {
-                    Utilites.wrException(e);                    
+                    Utilites.LogException(e);                    
                 }
                 finally
                 {
@@ -54,20 +56,20 @@ namespace _1xParser
         }
         static void Close()
         {
-            Utilites.cMsg("Stopping background tasks");
-            tasksMgr.doOtherThreads = false;
+            Utilites.Log("Stopping background tasks");
+            TasksMgr.doOtherThreads = false;
 
-            if (tasksMgr.taskThread != null)
-                if(tasksMgr.taskThread.ThreadState == ThreadState.WaitSleepJoin)
-                    tasksMgr.taskThread.Interrupt();
-                else if (tasksMgr.taskThread.IsAlive)
-                    tasksMgr.taskThread.Abort();
+            if (TasksMgr.taskThread != null)
+                if(TasksMgr.taskThread.ThreadState == ThreadState.WaitSleepJoin)
+                    TasksMgr.taskThread.Interrupt();
+                else if (TasksMgr.taskThread.IsAlive)
+                    TasksMgr.taskThread.Abort();
 
-            if (tasksMgr.parsingThread != null)
-                if (tasksMgr.parsingThread.ThreadState == ThreadState.WaitSleepJoin)
-                    tasksMgr.parsingThread.Interrupt();
-                else if (tasksMgr.parsingThread.IsAlive)
-                    tasksMgr.parsingThread.Abort();
+            if (TasksMgr.parsingThread != null)
+                if (TasksMgr.parsingThread.ThreadState == ThreadState.WaitSleepJoin)
+                    TasksMgr.parsingThread.Interrupt();
+                else if (TasksMgr.parsingThread.IsAlive)
+                    TasksMgr.parsingThread.Abort();
 
             if (Telegram.msgUpdThread != null)
             {
@@ -81,7 +83,7 @@ namespace _1xParser
 
             Params.SaveParams();
 
-            Utilites.cMsg("Closing");
+            Utilites.Log("Closing");
             //Console.WriteLine("Press any key to exit...");
             //Console.ReadKey();
         }

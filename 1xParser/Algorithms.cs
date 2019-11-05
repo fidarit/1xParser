@@ -11,16 +11,20 @@ namespace _1xParser
         public static void FirstAlg(long id)
         {
             Parser.ParseLive();
-            Game game = Program.games[id];
+            Game game;
+            lock (Program.gamesLocker)
+            {
+                game = Program.games[id];
+            }
 
             if (game.updTimeUNIX + 30 < Utilites.NowUNIX() || game.gameTime > 2700) //45 min
                 return;
 
-            tasksMgr.AddTask(new Task
+            TasksMgr.AddTask(new Task
             {
-                timeUNIX = Utilites.NowUNIX() + 30,
-                func = FirstAlg,
-                gameID = id
+                TimeUNIX = Utilites.NowUNIX() + 30,
+                Func = FirstAlg,
+                GameID = id
             });
 
             double deltaTotal = game.totalL - game.totalF;
@@ -44,16 +48,20 @@ namespace _1xParser
         public static void SecondAlg(long id)
         {
             Parser.ParseLive();
-            Game game = Program.games[id];
+            Game game;
+            lock (Program.gamesLocker)
+            {
+                game = Program.games[id];
+            }
 
             if (game.updTimeUNIX + 30 < Utilites.NowUNIX() || game.gameTime > 1200) //20 min
                 return;
             
-            tasksMgr.AddTask(new Task
+            TasksMgr.AddTask(new Task
             {
-                timeUNIX = Utilites.NowUNIX() + 30,
-                func = SecondAlg,
-                gameID = id
+                TimeUNIX = Utilites.NowUNIX() + 30,
+                Func = SecondAlg,
+                GameID = id
             });
 
             double totalF = game.totalF / 2;
@@ -79,12 +87,17 @@ namespace _1xParser
         public static void ThirdAlg(long id)
         {
             Parser.ParseLive();
-
-            tasksMgr.AddTask(new Task
+            Game game;
+            lock (Program.gamesLocker)
             {
-                timeUNIX = Utilites.NowUNIX() + 30,
-                func = ThirdAlg,
-                gameID = id
+                game = Program.games[id];
+            }
+
+            TasksMgr.AddTask(new Task
+            {
+                TimeUNIX = Utilites.NowUNIX() + 30,
+                Func = ThirdAlg,
+                GameID = id
             });
         }
     }

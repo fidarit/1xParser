@@ -6,16 +6,15 @@ namespace _1xParser
 {
     struct Task
     {
-        public int timeUNIX { get; set; }
-        public long gameID { get; set; }
-        public Action<long> func { get; set; }
+        public int TimeUNIX { get; set; }
+        public long GameID { get; set; }
+        public Action<long> Func { get; set; }
     }
-    static class tasksMgr
+    static class TasksMgr
     {
-        static List<Task> tasks = new List<Task>();
-        static bool taskStarted = false;
+        static readonly List<Task> tasks = new List<Task>();
         static bool parsingStarted = false;
-        static EventWaitHandle parsingThrEv = new EventWaitHandle(false, EventResetMode.ManualReset);
+        static readonly EventWaitHandle parsingThrEv = new EventWaitHandle(false, EventResetMode.ManualReset);
         public static bool doOtherThreads = true;
         public static Thread taskThread;
         public static Thread parsingThread;
@@ -27,7 +26,7 @@ namespace _1xParser
             {
                 if (parsingThread == null)
                 {
-                    parsingThread = new Thread(lineParsing);
+                    parsingThread = new Thread(LineParsing);
                     parsingThread.Name += " Line Parsing Thread";
                 }
                 else parsingThrEv.Set();
@@ -37,21 +36,21 @@ namespace _1xParser
         public static void AddTask(Task task)
         {
             tasks.Add(task);
-            tasks.Sort((a, b) => a.timeUNIX.CompareTo(b.timeUNIX));
+            tasks.Sort((a, b) => a.TimeUNIX.CompareTo(b.TimeUNIX));
             if (taskThread == null || !taskThread.IsAlive)
             {
-                taskThread = new Thread(doIt);
+                taskThread = new Thread(DoIt);
                 taskThread.Name += " Task Thread";
                 taskThread.Start();
             }
         }
         public static void StartParamsSaving()
         {
-            paramsSavingThread = new Thread(paramsSaving);
+            paramsSavingThread = new Thread(ParamsSaving);
             paramsSavingThread.Name += " Settings Saving Thread";
             paramsSavingThread.Start();
         }
-        static void lineParsing()
+        static void LineParsing()
         {
             try
             {
@@ -67,10 +66,10 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.wrException(e);
+                Utilites.LogException(e);
             }
         }
-        static void paramsSaving()
+        static void ParamsSaving()
         {
             try
             {
@@ -83,41 +82,38 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.wrException(e);
+                Utilites.LogException(e);
             }
         }
-        static void doIt()
+        static void DoIt()
         {
             try
             {
                 while (doOtherThreads)
                 {
-                    taskStarted = true;
-
-                    int sleepTime = tasks[0].timeUNIX - Utilites.NowUNIX();
+                    int sleepTime = tasks[0].TimeUNIX - Utilites.NowUNIX();
                     if (sleepTime > 0) Thread.Sleep(sleepTime * 1000);
 
                     try
                     {
-                        if (tasks[0].func != null)
-                            tasks[0].func(tasks[0].gameID);
+                        if (tasks[0].Func != null)
+                            tasks[0].Func(tasks[0].GameID);
                         else
                             parsingThrEv.Set();
 
                     }
                     catch (Exception e)
                     {
-                        Utilites.wrException(e);
+                        Utilites.LogException(e);
                     }
 
                     tasks.RemoveAt(0);
-                    taskStarted = false;
                     if (tasks.Count == 0) return;
                 }
             }
             catch (Exception e)
             {
-                Utilites.wrException(e);
+                Utilites.LogException(e);
             }
         }
     }

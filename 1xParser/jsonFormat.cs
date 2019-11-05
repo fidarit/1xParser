@@ -141,7 +141,7 @@
 
     public class E
     {
-        public float C { get; set; }
+        public double C { get; set; }
         public int G { get; set; }
         public int T { get; set; }
         public double P { get; set; }

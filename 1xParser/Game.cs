@@ -15,14 +15,16 @@ namespace _1xParser
         public string league;
         public double totalF;
         public double totalL;
-        public team[] teams; 
+        public Team[] teams;
+        public short favTeam;
         public Game()
         {
-            teams = new team[2];
+            teams = new Team[2];
+            favTeam = -1;
         }
     }
     [Serializable]
-    struct team
+    struct Team
     {
         public string name;
     }
