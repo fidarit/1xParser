@@ -48,7 +48,7 @@ namespace _1xParser
                     taskThread.Abort();
                     taskThread = null;
                 }
-                if (taskThread == null || taskThread.ThreadState != ThreadState.Running)
+                if (taskThread == null || !taskThread.IsAlive)
                 {
                     taskThread = new Thread(DoIt);
                     taskThread.Name += " Task Thread";
@@ -76,7 +76,7 @@ namespace _1xParser
                     Parser.ParseLine();
 
                     parsingStarted = false;
-                    parsingThrEv.WaitOne(300000);
+                    parsingThrEv.WaitOne(200000); //3 min 20 sec
                 }
             }
             catch (Exception e)

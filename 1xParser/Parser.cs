@@ -12,16 +12,18 @@ namespace _1xParser
         private static DateTime lastLVParseTime = DateTime.MinValue;
         public static void ParseLine(long ID = -1)
         {
-            if (lastLNParseTime.AddSeconds(15) > DateTime.Now)
-                Thread.Sleep(11000);
+            if (lastLNParseTime.AddSeconds(5) > DateTime.Now)
+                Thread.Sleep(4000);
 
             Utilites.Log("Parsing Line Page");
-            string strRes = Parse("https://1xstavka.ru/line/Handball/");
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            jsonFormats.LineRootObj[] objs;
+            jsonFormats.ValueLN[] objs;
             try
             {
-                objs = serializer.Deserialize<jsonFormats.LineRootObj[]>(strRes);
+                string url = "https://1xstavka.ru/LineFeed/Get1x2_VZip?sports=8&count=50&mode=4&country=1&partner=51&getEmpty=true";
+                string strRes = Utilites.GetHTML(url);
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                jsonFormats.LineRootObj obj = serializer.Deserialize<jsonFormats.LineRootObj>(strRes);
+                objs = obj.Value;
             }
             catch(Exception e)
             {
@@ -33,34 +35,35 @@ namespace _1xParser
             
             for (int i = 0; i < objs.Length; i++)
             {
-                long id = objs[i].I;
+                jsonFormats.ValueLN obj = objs[i];
+                long id = obj.N;
                 Game resObj;
+
+                obj.E = RebuidE_array(obj.E);
+                if (obj.E == null)
+                    continue;
+
                 lock (Program.gamesLocker)
                 {
                     resObj = Program.games.ContainsKey(id) ? Program.games[id] : new Game();
-                }
-                if (resObj.updTimeUNIX + 300 > Utilites.NowUNIX())
-                    continue;
 
-                resObj.league = objs[i].L;
-                resObj.startTimeUNIX = objs[i].S;
-                resObj.updTimeUNIX = Utilites.NowUNIX();
-                if (objs[i].E.Length < 9)
-                    continue;
-                resObj.totalF = objs[i].E[8].P;
+                    resObj.league = obj.L;
+                    resObj.startTimeUNIX = obj.S;
+                    resObj.updTimeUNIX = Utilites.NowUNIX();
+                    if (obj.E.Length < 9)
+                        continue;
+                    resObj.totalF = obj.E[8].P;
 
-                resObj.teams[0].name = objs[i].O1;
-                resObj.teams[1].name = objs[i].O2;
+                    resObj.teams[0].name = obj.O1;
+                    resObj.teams[1].name = obj.O2;
 
-                lock (Program.gamesLocker)
-                {
                     Program.games[id] = resObj;
                 }
-                if(id == ID)
+                if(resObj.startTimeUNIX < Utilites.NowUNIX() + 301)
                 {
-                    if (objs[i].E[0].C <= 1.6)
+                    if (obj.E[0].C > 0 && obj.E[0].C <= 1.6)
                         resObj.favTeam = 0;
-                    else if(objs[i].E[2].C <= 1.6)
+                    else if(obj.E[2].C > 0 && obj.E[2].C <= 1.6)
                         resObj.favTeam = 1;
 
                     Task task = new Task
@@ -92,7 +95,7 @@ namespace _1xParser
                 }
                 else
                 {
-                    int rand = (int)(new Random().NextDouble() * 200);
+                    int rand = (int)(new Random().NextDouble() * 150);
                     Task task = new Task
                     {
                         GameID = id,
@@ -107,22 +110,22 @@ namespace _1xParser
             JavaScriptSerializer scriptSerializer = new JavaScriptSerializer();
             File.WriteAllText("games.txt", scriptSerializer.Serialize(Program.games.Values));
 
-
             lastLNParseTime = DateTime.Now;
         }
-
         public static void ParseLive()
         {
-            if (lastLVParseTime.AddSeconds(15) > DateTime.Now)
+            if (lastLVParseTime.AddSeconds(5) > DateTime.Now)
                 return;
 
             Utilites.Log("Parsing Live Page");
-            string strRes = Parse("https://1xstavka.ru/live/Handball/");
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            jsonFormats.LiveRootObj[] objs;
+            jsonFormats.ValueLV[] objs;
             try
             {
-                objs = serializer.Deserialize<jsonFormats.LiveRootObj[]>(strRes);
+                string url = "https://1xstavka.ru/LiveFeed/Get1x2_VZip?sports=8&count=50&mode=4&country=1&partner=51&getEmpty=true";
+                string strRes = Utilites.GetHTML(url);
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                jsonFormats.LiveRootObj obj = serializer.Deserialize<jsonFormats.LiveRootObj>(strRes);
+                objs = obj.Value;
             }
             catch (Exception e)
             {
@@ -134,29 +137,31 @@ namespace _1xParser
 
             for (int i = 0; i < objs.Length; i++)
             {
-                long id = objs[i].I;
+                jsonFormats.ValueLV obj = objs[i];
+                long id = obj.N;
                 Game resObj;
+
+                obj.E = RebuidE_array(obj.E);
+                if (obj.E == null)
+                    continue;
+
                 lock (Program.gamesLocker)
                 {
                     if (!Program.games.ContainsKey(id))
                         continue;
                     resObj = Program.games[id];
-                }
 
-                resObj.league = objs[i].L;
-                resObj.startTimeUNIX = objs[i].S;
-                resObj.updTimeUNIX = Utilites.NowUNIX();
-                resObj.gameTime = objs[i].SC.TS;
-                if (objs[i].E.Length < 9)
-                    continue;
-                resObj.totalL = objs[i].E[8].P;
+                    resObj.league = obj.L;
+                    resObj.startTimeUNIX = obj.S;
+                    resObj.updTimeUNIX = Utilites.NowUNIX();
+                    resObj.gameTime = obj.SC.TS;
+                    if (obj.E.Length < 9)
+                        continue;
+                    resObj.totalL = obj.E[8].P;
 
-                resObj.teams[0].name = objs[i].O1;
-                resObj.teams[1].name = objs[i].O2;
+                    resObj.teams[0].name = obj.O1;
+                    resObj.teams[1].name = obj.O2;
 
-
-                lock (Program.gamesLocker)
-                {
                     Program.games[id] = resObj;
                 }
             }
@@ -164,23 +169,30 @@ namespace _1xParser
 
             lastLVParseTime = DateTime.Now;
         }
-        static string Parse(string url)
+        static jsonFormats.E[] RebuidE_array(jsonFormats.E[] e)
         {
-            string mass = Utilites.GetHTML(url);
+            if (e == null || e.Length == 0)
+                return null;
 
             try
             {
-                Match match = Regex.Match(mass, '"' + "Value.*?:(\\[.*\\]).*SSR_TOP_SPORTS");
-                if (match.Groups.Count > 0)
+                int Tmax = 0;
+                foreach (jsonFormats.E em in e)
                 {
-                    mass = match.Groups[1].Value; //значение скобки рег выр
+                    Tmax = Tmax < em.T ? em.T : Tmax;
                 }
 
-                return mass;
+                jsonFormats.E[] es = new jsonFormats.E[Tmax];
+
+                foreach (jsonFormats.E em in e)
+                {
+                    es[em.T - 1] = em;
+                }
+                return e;
             }
-            catch (Exception e)
+            catch(Exception ex)
             {
-                Utilites.LogException(e);
+                Utilites.LogException(ex);
                 return null;
             }
         }

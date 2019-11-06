@@ -10,7 +10,7 @@ namespace _1xParser
     {
         static readonly DateTime unixHelper = new DateTime(1970, 1, 1);
         static readonly object getHtmlLocker = new object();
-        static readonly object getLocker = new object();
+        static readonly object getPostLocker = new object();
 
         public static int NowUNIX()
         {
@@ -76,17 +76,58 @@ namespace _1xParser
             Console.WriteLine(DateTime.Now.ToShortDateString() + " "
                 + DateTime.Now.ToLongTimeString() + " " + msg);
         }
-        public static string GET(string url)
+        public static string Post(string url, string data)
         {
             string Out = "";
             try
             {
-                lock (getLocker)
+                lock (getPostLocker)
                 {
                     WebRequest req = WebRequest.Create(url);
                     req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
                     req.UseDefaultCredentials = true;
                     req.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                    req.Method = "POST";
+                    req.Timeout = 10000;
+                    req.ContentType = "application/x-www-form-urlencoded";
+                    byte[] sentData = Encoding.GetEncoding(1251).GetBytes(data);
+                    req.ContentLength = sentData.Length;
+                    Stream sendStream = req.GetRequestStream();
+                    sendStream.Write(sentData, 0, sentData.Length);
+                    sendStream.Close();
+                    WebResponse res = req.GetResponse();
+                    Stream ReceiveStream = res.GetResponseStream();
+                    using (StreamReader sr = new StreamReader(ReceiveStream, Encoding.UTF8))
+                    {
+                        char[] read = new char[256];
+                        int count = sr.Read(read, 0, 256);
+                        while (count > 0)
+                        {
+                            String str = new String(read, 0, count);
+                            Out += str;
+                            count = sr.Read(read, 0, 256);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogException(e);
+            }
+            return Out;
+        }
+        public static string GET(string url)
+        {
+            string Out = "";
+            try
+            {
+                lock (getPostLocker)
+                {
+                    WebRequest req = WebRequest.Create(url);
+                    req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
+                    req.UseDefaultCredentials = true;
+                    req.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                    req.Timeout = 10000;
                     WebResponse resp = req.GetResponse();
                     Stream stream = resp.GetResponseStream();
                     StreamReader sr = new StreamReader(stream);

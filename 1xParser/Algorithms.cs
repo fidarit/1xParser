@@ -17,15 +17,18 @@ namespace _1xParser
                 game = Program.games[id];
             }
 
-            if (game.updTimeUNIX + 30 < Utilites.NowUNIX() || game.gameTime > 2700) //45 min
+            if (game.gameTime > 2700) //45 min
                 return;
 
             TasksMgr.AddTask(new Task
             {
-                TimeUNIX = Utilites.NowUNIX() + 30,
+                TimeUNIX = Utilites.NowUNIX() + 25,
                 Func = FirstAlg,
                 GameID = id
             });
+
+            if (game.updTimeUNIX + 30 < Utilites.NowUNIX())
+                return;
 
             double deltaTotal = game.totalL - game.totalF;
             string rec = "";
@@ -54,17 +57,20 @@ namespace _1xParser
                 game = Program.games[id];
             }
 
-            if (game.updTimeUNIX + 30 < Utilites.NowUNIX() || game.gameTime > 1200) //20 min
+            if (game.gameTime > 1200) //20 min
                 return;
             
             TasksMgr.AddTask(new Task
             {
-                TimeUNIX = Utilites.NowUNIX() + 30,
+                TimeUNIX = Utilites.NowUNIX() + 25,
                 Func = SecondAlg,
                 GameID = id
             });
 
-            double totalF = game.totalF / 2;
+            if(game.updTimeUNIX + 30 < Utilites.NowUNIX())
+                return;
+
+            double totalF = Math.Round(game.totalF / 2);
             double totalL = game.totalL / 2;
             double deltaTotal = totalF - totalL;
             string rec = "";
@@ -79,8 +85,8 @@ namespace _1xParser
                 + "<br />Лига - \"" + game.league + "\""
                 + "<br />Команда - \"" + game.teams[0].name + " - " + game.teams[1].name + "\""
                 + "<br />Время - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
-                + "<br />Начальный тотал -  \"" + game.totalF + "\""
-                + "<br />Сейчас тотал -  \"" + game.totalL + "\""
+                + "<br />Начальный тотал -  \"" + totalF + "\""
+                + "<br />Сейчас тотал -  \"" + totalL + "\""
                 + "<br />Разница тотала - \"" + deltaTotal + "\""
                 + "<br />Рекомендую - \"" + rec + "\"");
         }
@@ -93,12 +99,20 @@ namespace _1xParser
                 game = Program.games[id];
             }
 
+            if (game.gameTime > 4200) //45 min
+                return;
+
             TasksMgr.AddTask(new Task
             {
                 TimeUNIX = Utilites.NowUNIX() + 30,
                 Func = ThirdAlg,
                 GameID = id
             });
+
+            if (game.updTimeUNIX + 30 < Utilites.NowUNIX())
+                return;
+
+
         }
     }
 }

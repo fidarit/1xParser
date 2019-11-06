@@ -105,12 +105,12 @@ namespace _1xParser
         }
         public static void SaveParams()
         {
-            if (lastSavedParams.Equals(m_params))
-                return;
-            
             Utilites.Log("Saving Settings");
             if (File.Exists(paramsFile))
             {
+                if (lastSavedParams.Equals(m_params))
+                    return;
+
                 string backupFile = backupDir + "/" + paramsFile + ".";
                 Directory.CreateDirectory(backupDir);
 
@@ -165,5 +165,19 @@ namespace _1xParser
         public int lastUMid = -1; //Last upd message id
         public string proxyIP = "";
         public int proxyPort = 0;
+
+        public bool Equals(ParamsObj obj)
+        {
+            if (telegToken == obj.telegToken
+                && users.ToString() == obj.users.ToString()
+                && lastUMid == obj.lastUMid
+                && proxyIP == obj.proxyIP
+                && proxyPort == obj.proxyPort)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
     }
 }
