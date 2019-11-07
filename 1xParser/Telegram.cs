@@ -1,5 +1,5 @@
 ﻿using System;
-//using System.Text;
+using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Script.Serialization;
@@ -12,24 +12,29 @@ namespace _1xParser
 
         public static int SendMessage(string text, int targetID)
         {
-            string eText = HttpUtility.UrlEncode(text, System.Text.Encoding.GetEncoding(1251));
+            string eText = HttpUtility.UrlEncode(text, Encoding.UTF8);
             DateTime time = DateTime.Now;
 
-            Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/sendMessage",
-                "chat_id=" + targetID + "&text=" + eText + "&parse_mode=HTML");
+            eText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/sendMessage",
+                "chat_id=" + targetID + "&text=" + eText);
 
             int sleepTime = (int)(time.AddMilliseconds(33) - DateTime.Now).TotalMilliseconds;
             if (sleepTime > 0) Thread.Sleep(sleepTime);
-            return 0;
+
+            if (eText.Length > 10)
+                return 0;
+            else
+                return 1;
         }
         public static int SendMessageToAll(string text)
         {
+            int ret = Params.Users.Count;
             for (int i = 0; i < Params.Users.Count; i++)
             {
-                SendMessage(text, Params.Users[i]);
+                ret *= SendMessage(text, Params.Users[i]);
             }
 
-            return 0;
+            return ret;
         }
         public static void StartMsgUpd()
         {

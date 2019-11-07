@@ -13,8 +13,17 @@ namespace _1xParser
         public int updTimeUNIX;
         public int gameTime;
         public string league;
+
         public double totalF;
         public double totalL;
+        public double TkfMore;
+        public double TkfLess;
+
+        public double iTotalF;
+        public double iTotalL;
+        public double iTkfMore;
+        public double iTkfLess;
+
         public Team[] teams;
         public short favTeam;
         public Game()
@@ -27,5 +36,7 @@ namespace _1xParser
     struct Team
     {
         public string name;
+        public double kf;
+        public int goals1T;
     }
 }

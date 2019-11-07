@@ -50,21 +50,31 @@ namespace _1xParser
                     resObj.league = obj.L;
                     resObj.startTimeUNIX = obj.S;
                     resObj.updTimeUNIX = Utilites.NowUNIX();
-                    if (obj.E.Length < 9)
+                    if (obj.E.Length < 10)
                         continue;
                     resObj.totalF = obj.E[8].P;
+                    resObj.TkfMore = obj.E[8].C;
+                    resObj.TkfLess = obj.E[9].C;
 
                     resObj.teams[0].name = obj.O1;
                     resObj.teams[1].name = obj.O2;
+
+                    resObj.teams[0].kf = obj.E[0].C;
+                    resObj.teams[1].kf = obj.E[2].C;
 
                     Program.games[id] = resObj;
                 }
                 if(resObj.startTimeUNIX < Utilites.NowUNIX() + 301)
                 {
-                    if (obj.E[0].C > 0 && obj.E[0].C <= 1.6)
+                    if (resObj.teams[0].kf > 0 && resObj.teams[0].kf <= 1.6)
                         resObj.favTeam = 0;
-                    else if(obj.E[2].C > 0 && obj.E[2].C <= 1.6)
+                    else if(resObj.teams[1].kf > 0 && resObj.teams[1].kf <= 1.6)
                         resObj.favTeam = 1;
+
+                    if (obj.E.Length > 13 && resObj.favTeam > -1)
+                    {
+                        resObj.iTotalF = obj.E[12 + resObj.favTeam].P;
+                    }
 
                     Task task = new Task
                     {
@@ -157,7 +167,34 @@ namespace _1xParser
                     resObj.gameTime = obj.SC.TS;
                     if (obj.E.Length < 9)
                         continue;
+
                     resObj.totalL = obj.E[8].P;
+
+                    if (obj.E.Length > 13 && resObj.favTeam > -1)
+                    {
+                        if (resObj.favTeam == 0)
+                        {
+                            resObj.iTotalL = obj.E[10].P;
+                            resObj.iTkfMore = obj.E[10].C;
+                            resObj.iTkfLess = obj.E[11].C;
+                        }
+                        else
+                        {
+                            resObj.iTotalL = obj.E[12].P;
+                            resObj.iTkfMore = obj.E[12].C;
+                            resObj.iTkfLess = obj.E[13].C;
+                        }
+                    }
+
+                    if(resObj.gameTime > 1000 
+                        && obj.SC != null && obj.SC.PS != null && obj.SC.PS.Length > 0)
+                    {
+                        resObj.teams[0].goals1T = obj.SC.PS[0].Value.S1;
+                        resObj.teams[1].goals1T = obj.SC.PS[0].Value.S2;
+                    }
+
+                    resObj.TkfMore = obj.E[8].C;
+                    resObj.TkfLess = obj.E[9].C;
 
                     resObj.teams[0].name = obj.O1;
                     resObj.teams[1].name = obj.O2;
