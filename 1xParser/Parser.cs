@@ -10,7 +10,7 @@ namespace _1xParser
     {
         private static DateTime lastLNParseTime = DateTime.MinValue;
         private static DateTime lastLVParseTime = DateTime.MinValue;
-        public static void ParseLine(long ID = -1)
+        public static void ParseLine(int ID = -1)
         {
             if (lastLNParseTime.AddSeconds(5) > DateTime.Now)
                 Thread.Sleep(4000);
@@ -36,7 +36,7 @@ namespace _1xParser
             for (int i = 0; i < objs.Length; i++)
             {
                 jsonFormats.ValueLN obj = objs[i];
-                long id = obj.N;
+                int id = obj.N;
                 Game resObj;
 
                 obj.E = RebuidE_array(obj.E);
@@ -64,11 +64,11 @@ namespace _1xParser
 
                     Program.games[id] = resObj;
                 }
-                if(resObj.startTimeUNIX < Utilites.NowUNIX() + 301)
+                if (resObj.startTimeUNIX < Utilites.NowUNIX() + 301)
                 {
                     if (resObj.teams[0].kf > 0 && resObj.teams[0].kf <= 1.6)
                         resObj.favTeam = 0;
-                    else if(resObj.teams[1].kf > 0 && resObj.teams[1].kf <= 1.6)
+                    else if (resObj.teams[1].kf > 0 && resObj.teams[1].kf <= 1.6)
                         resObj.favTeam = 1;
 
                     if (obj.E.Length > 13 && resObj.favTeam > -1)
@@ -76,23 +76,31 @@ namespace _1xParser
                         resObj.iTotalF = obj.E[12 + resObj.favTeam].P;
                     }
 
-                    Task task = new Task
+                    Task task;
+                    if (!resObj.algActived[0])
                     {
-                        GameID = id,
-                        TimeUNIX = resObj.startTimeUNIX + 600, //10 min
-                        Func = Algorithms.FirstAlg
-                    };
-                    TasksMgr.AddTask(task);
-
-                    task = new Task
+                        task = new Task
+                        {
+                            GameID = id,
+                            TimeUNIX = resObj.startTimeUNIX + 600, //10 min
+                            Func = Algorithms.FirstAlg
+                        };
+                        TasksMgr.AddTask(task);
+                        resObj.algActived[0] = true;
+                    }
+                    if (!resObj.algActived[1])
                     {
-                        GameID = id,
-                        TimeUNIX = resObj.startTimeUNIX + 300, //5 min
-                        Func = Algorithms.SecondAlg
-                    };
-                    TasksMgr.AddTask(task);
+                        task = new Task
+                        {
+                            GameID = id,
+                            TimeUNIX = resObj.startTimeUNIX + 300, //5 min
+                            Func = Algorithms.SecondAlg
+                        };
+                        TasksMgr.AddTask(task);
+                        resObj.algActived[1] = true;
+                    }
 
-                    if (resObj.favTeam >= 0)
+                    if (!resObj.algActived[2] && resObj.favTeam >= 0)
                     {
                         task = new Task
                         {
@@ -101,6 +109,7 @@ namespace _1xParser
                             Func = Algorithms.ThirdAlg
                         };
                         TasksMgr.AddTask(task);
+                        resObj.algActived[2] = true;
                     }
                 }
                 else
@@ -165,7 +174,7 @@ namespace _1xParser
                     resObj.startTimeUNIX = obj.S;
                     resObj.updTimeUNIX = Utilites.NowUNIX();
                     resObj.gameTime = obj.SC.TS;
-                    if (obj.E.Length < 9)
+                    if (obj.E.Length < 10)
                         continue;
 
                     resObj.totalL = obj.E[8].P;

@@ -10,8 +10,8 @@ namespace _1xParser
     struct Task
     {
         public int TimeUNIX { get; set; }
-        public long GameID { get; set; }
-        public Action<long> Func { get; set; }
+        public int GameID { get; set; }
+        public Action<int> Func { get; set; }
     }
     static class TasksMgr
     {
@@ -130,7 +130,7 @@ namespace _1xParser
 
                     lock (tasksLocker)
                     {
-                        tasks.RemoveAt(0);
+                        tasks.Remove(task);
                         if (tasks.Count == 0) return;
                     }
                 }

@@ -24,11 +24,14 @@ namespace _1xParser
         public double iTkfMore;
         public double iTkfLess;
 
+        public bool[] algActived;
+
         public Team[] teams;
         public short favTeam;
         public Game()
         {
             teams = new Team[2];
+            algActived = new bool[3] { false, false, false };
             favTeam = -1;
         }
     }

@@ -8,7 +8,7 @@ namespace _1xParser
 {
     static class Algorithms
     {
-        public static void FirstAlg(long id)
+        public static void FirstAlg(int id)
         {
             Parser.ParseLive();
             Game game;
@@ -62,7 +62,7 @@ namespace _1xParser
                 });
             }
         }
-        public static void SecondAlg(long id)
+        public static void SecondAlg(int id)
         {
             Parser.ParseLive();
             Game game;
@@ -118,7 +118,7 @@ namespace _1xParser
                 });
             }
         }
-        public static void ThirdAlg(long id)
+        public static void ThirdAlg(int id)
         {
             Parser.ParseLive();
             Game game;
@@ -126,7 +126,16 @@ namespace _1xParser
             {
                 game = Program.games[id];
             }
-
+            if(game.gameTime < 1800)
+            {
+                TasksMgr.AddTask(new Task
+                {
+                    TimeUNIX = Utilites.NowUNIX() + 1800 - game.gameTime,
+                    Func = ThirdAlg,
+                    GameID = id
+                });
+                return;
+            }
             if (game.gameTime >= 1800 && game.gameTime < 1810 && game.updTimeUNIX + 10 < Utilites.NowUNIX())
             {
                 TasksMgr.AddTask(new Task
