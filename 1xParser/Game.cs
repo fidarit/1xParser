@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _1xParser
 {
-    [Serializable]
     class Game
     {
         public int startTimeUNIX;
@@ -35,7 +30,6 @@ namespace _1xParser
             favTeam = -1;
         }
     }
-    [Serializable]
     struct Team
     {
         public string name;

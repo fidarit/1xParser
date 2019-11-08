@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
-using System.Web.Script.Serialization;
 
 namespace _1xParser
 {
-    [Serializable]
     struct Task
     {
         public int TimeUNIX { get; set; }
@@ -23,7 +20,7 @@ namespace _1xParser
         public static bool doOtherThreads = true;
         public static Thread taskThread;
         public static Thread parsingThread;
-        public static Thread paramsSavingThread;
+        public static Thread usersSavingThread;
 
         public static void StartLineParsing()
         {
@@ -59,11 +56,11 @@ namespace _1xParser
                 tasks.Sort((a, b) => a.TimeUNIX.CompareTo(b.TimeUNIX));
             }
         }
-        public static void StartParamsSaving()
+        public static void StartUsersSaving()
         {
-            paramsSavingThread = new Thread(ParamsSaving);
-            paramsSavingThread.Name += " Settings Saving Thread";
-            paramsSavingThread.Start();
+            usersSavingThread = new Thread(UsersSaving);
+            usersSavingThread.Name += " Users Saving Thread";
+            usersSavingThread.Start();
         }
         static void LineParsing()
         {
@@ -84,14 +81,14 @@ namespace _1xParser
                 Utilites.LogException(e);
             }
         }
-        static void ParamsSaving()
+        static void UsersSaving()
         {
             try
             {
+                Thread.Sleep(30000); //30 sec
                 while (doOtherThreads)
                 {
-                    Params.SaveParams();
-
+                    Params.SaveUsers();
                     Thread.Sleep(600000); //10 min
                 }
             }

@@ -16,6 +16,7 @@ namespace _1xParser
         {
             return (int)(DateTime.UtcNow - unixHelper).TotalSeconds;
         }
+
         public static string GetHTML(string url)
         {
             for (int i = 0; i < 5; i++)
@@ -46,36 +47,6 @@ namespace _1xParser
             }
             return null;
         }
-        public static void LogException(Exception e)
-        {
-            if (e.Message.Contains("Thread") || e.Message.Contains("Поток"))
-                LogWarning(e.Message);
-            else
-            {
-                LogError(e.StackTrace.Replace(" в ", Environment.NewLine + "\t в "));
-                LogError(e.Message);
-            }
-        }
-        public static void LogWarning(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            WriteLine(msg);
-        }
-        public static void LogError(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            WriteLine(msg);
-        }
-        public static void Log(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            WriteLine(msg);
-        }
-        static void WriteLine(string msg)
-        {
-            Console.WriteLine(DateTime.Now.ToShortDateString() + " "
-                + DateTime.Now.ToLongTimeString() + " " + msg);
-        }
         public static string Post(string url, string data)
         {
             string Out = "";
@@ -84,9 +55,12 @@ namespace _1xParser
                 lock (getPostLocker)
                 {
                     WebRequest req = WebRequest.Create(url);
-                    req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
+                    if (Params.UseProxy)
+                    {
+                        req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
+                        req.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                    }
                     req.UseDefaultCredentials = true;
-                    req.Proxy.Credentials = CredentialCache.DefaultCredentials;
                     req.Method = "POST";
                     req.Timeout = 10000;
                     req.ContentType = "application/x-www-form-urlencoded";
@@ -103,7 +77,7 @@ namespace _1xParser
                         int count = sr.Read(read, 0, 256);
                         while (count > 0)
                         {
-                            String str = new String(read, 0, count);
+                            string str = new string(read, 0, count);
                             Out += str;
                             count = sr.Read(read, 0, 256);
                         }
@@ -124,9 +98,12 @@ namespace _1xParser
                 lock (getPostLocker)
                 {
                     WebRequest req = WebRequest.Create(url);
-                    req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
+                    if (Params.UseProxy)
+                    {
+                        req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
+                        req.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                    }
                     req.UseDefaultCredentials = true;
-                    req.Proxy.Credentials = CredentialCache.DefaultCredentials;
                     req.Timeout = 10000;
                     WebResponse resp = req.GetResponse();
                     Stream stream = resp.GetResponseStream();
@@ -135,11 +112,40 @@ namespace _1xParser
                     sr.Close();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LogException(e);
             }
             return Out;
+        }
+
+        public static void LogException(Exception e)
+        {
+            if (!(e.Message.Contains("Thread") || e.Message.Contains("Поток"))) { 
+                LogError(e.StackTrace.Replace(" в ", Environment.NewLine + "\t в "));
+                LogError(e.Message);
+            }
+        }
+        public static void LogWarning(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            WriteLine(msg);
+        }
+        public static void LogError(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            WriteLine(msg);
+        }
+        public static void Log(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            WriteLine(msg);
+        }
+
+        static void WriteLine(string msg)
+        {
+            Console.WriteLine(DateTime.Now.ToShortDateString() + " "
+                + DateTime.Now.ToLongTimeString() + " " + msg);
         }
     }
 }

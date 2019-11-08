@@ -7,44 +7,65 @@ namespace _1xParser
 {
     class Program
     {
-        public static Dictionary<long, Game> games;
+        public static Dictionary<int, Game> games;
         public static readonly object gamesLocker = new object();
 
         static bool doItAll = true;
 
         static int Main()
         {
-            SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
+            handlerRoutine = new HandlerRoutine(ConsoleCtrlCheck);
+            SetConsoleCtrlHandler(handlerRoutine, true);
 
             while (doItAll)
             {
                 try
                 {
-                    Utilites.Log("Starting");
-                    games = new Dictionary<long, Game>();
-
-
-                    Utilites.Log("Load Settings");
+                    Utilites.Log("Запуск программы");
+                    games = new Dictionary<int, Game>();
+                    
                     if (!Params.LoadParams())
                     {
-                        Utilites.LogError("There is not settings file  - \"params.xml\"");
-                        Utilites.LogWarning("Settings file created");
-                        Utilites.LogWarning("Closing");
+                        Utilites.LogError("Файл настроек не обнаружен - \"params.xml\", создаю новый...");
+                    }
+                    if (!Params.LoadUsers())
+                    {
+                        Utilites.LogError("Файл со списком пользователей не обнаружен  - \"users.xml\", создаю новый...");
+                    }
+                    if (Params.TelegToken == null || Params.TelegToken.Length < 6)
+                    {
+                        Utilites.LogError("Токен Telegram API не обнаружен, надо ввести его в файле params.xml");
+                        Utilites.LogWarning("Завершение работы...");
                         Console.WriteLine("Press any key to exit...");
                         Console.ReadKey();
                         return -1;
                     }
-                    Utilites.Log("Press Ctrl + C to settings saving");
 
-                    Utilites.Log("Starting Telegram messages updater");
+                    Utilites.Log("Нажмите Ctrl + C чтобы сохранить список пользователей");
+
+                    Utilites.Log("Запускаю сервисы Telegram");
                     Telegram.StartMsgUpd();
 
-                  //  Parser.ParseLine();
-                    //Parser.ParseLive();
-
                     TasksMgr.StartLineParsing();
+                    TasksMgr.StartUsersSaving();
 
-                    Thread.Sleep((int)TimeSpan.FromHours(6).TotalMilliseconds); //Restart program every 6 hours
+                    Thread.Sleep(12000000); // ждать 3.333 часа
+                    bool sleepAgain = false;
+                    while (!sleepAgain)
+                    {
+                        foreach (Game game in games.Values)
+                        {
+                            sleepAgain |= game.algActived[0] | game.algActived[1] | game.algActived[2]; //если есть активные алгоритмы
+                            int time = game.startTimeUNIX - Utilites.NowUNIX();
+                            sleepAgain |= time > 0 && time < 300; //или в течении пяти минут начнется игра
+                            if (sleepAgain)
+                            {
+                                Thread.Sleep(500000); //то подождать ещё 8,333 мин
+                                break;
+                            }
+                        }
+                    }
+
                 }
                 catch(Exception e)
                 {
@@ -59,7 +80,7 @@ namespace _1xParser
         }
         static void Close()
         {
-            Utilites.Log("Stopping background tasks");
+            Utilites.Log("Остановка фоновых задач");
             TasksMgr.doOtherThreads = false;
 
             if (TasksMgr.taskThread != null)
@@ -84,14 +105,16 @@ namespace _1xParser
                 Telegram.msgUpdThread.Join();
             }
 
-            Params.SaveParams();
+            Params.SaveUsers();
 
-            Utilites.Log("Closing");
+            Utilites.Log("Завершение работы");
             //Console.WriteLine("Press any key to exit...");
             //Console.ReadKey();
         }
 
         public delegate bool HandlerRoutine(CtrlTypes CtrlType);
+        private static HandlerRoutine handlerRoutine;
+        private static GCHandle gcObjKeyboardProcess = GCHandle.Alloc(handlerRoutine);
         public enum CtrlTypes
         {
             CTRL_C_EVENT = 0,
@@ -124,7 +147,7 @@ namespace _1xParser
                     Thread.Sleep(1500);
                     return true;
                 case CtrlTypes.CTRL_C_EVENT:
-                    Params.SaveParams();
+                    Params.SaveUsers();
                     return true;
                 default:
                     return false;

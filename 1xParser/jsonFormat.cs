@@ -152,10 +152,10 @@
 
     public class E
     {
-        public double C { get; set; }
-        public int G { get; set; }
-        public int T { get; set; }
-        public double P { get; set; }
+        public double C { get; set; } = 0;
+        public int G { get; set; } = 0;
+        public int T { get; set; } = 0;
+        public double P { get; set; } = 0;
     }
 
     public class MI

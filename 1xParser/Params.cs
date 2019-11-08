@@ -8,8 +8,12 @@ namespace _1xParser
     static class Params
     {
         static ParamsObj m_params;
-        static ParamsObj lastSavedParams;
+
+        static UsersObj m_users;
+        static UsersObj lastSavedUsers;
+
         const string paramsFile = "params.xml";
+        const string usersFile = "users.xml";
         const string backupDir = "Backups";
 
         public static string TelegToken
@@ -19,13 +23,18 @@ namespace _1xParser
         }
         public static List<int> Users
         {
-            get { return m_params.users; }
-            set { m_params.users = value; }
+            get { return m_users.users; }
+            set { m_users.users = value; }
         }
         public static int LastUMid
         {
-            get { return m_params.lastUMid; }
-            set { m_params.lastUMid = value; }
+            get { return m_users.lastUMid; }
+            set { m_users.lastUMid = value; }
+        }
+        public static bool UseProxy
+        {
+            get { return m_params.useProxy; }
+            set { m_params.useProxy = value; }
         }
         public static string ProxyIP
         {
@@ -37,8 +46,10 @@ namespace _1xParser
             get { return m_params.proxyPort; }
             set { m_params.proxyPort = value; }
         }
-        public static bool LoadParams(byte id = 0)
+
+        public static bool LoadParams()
         {
+            Utilites.Log("Загрузка настроек");
             if (File.Exists(paramsFile))
             {
                 try
@@ -48,24 +59,55 @@ namespace _1xParser
                         XmlSerializer formatter = new XmlSerializer(typeof(ParamsObj));
                         m_params = (ParamsObj)formatter.Deserialize(fs);
                     }
-                    using (FileStream fs = new FileStream(paramsFile, FileMode.Open))
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Utilites.LogException(e);
+                    return false;
+                }
+            }
+            else
+            {
+                m_params = new ParamsObj();
+
+                XmlSerializer formatter = new XmlSerializer(typeof(ParamsObj));
+                using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
+                {
+                    formatter.Serialize(fs, m_params);
+                }
+
+                return false;
+            }
+        }
+        public static bool LoadUsers(byte id = 0)
+        {
+            if (File.Exists(usersFile))
+            {
+                try
+                {
+                    using (FileStream fs = new FileStream(usersFile, FileMode.Open))
                     {
-                        XmlSerializer formatter = new XmlSerializer(typeof(ParamsObj));
-                        lastSavedParams = (ParamsObj)formatter.Deserialize(fs);
+                        XmlSerializer formatter = new XmlSerializer(typeof(UsersObj));
+                        m_users = (UsersObj)formatter.Deserialize(fs);
+                    }
+                    using (FileStream fs = new FileStream(usersFile, FileMode.Open))
+                    {
+                        XmlSerializer formatter = new XmlSerializer(typeof(UsersObj));
+                        lastSavedUsers = (UsersObj)formatter.Deserialize(fs);
                     }
                     return true;
                 }
                 catch(Exception e)
                 {
                     int i = 0;
-                    string errFile = paramsFile + ".err";
+                    string errFile = usersFile + ".err";
                     while (File.Exists(errFile + i))
                     {
-                        i++;
-                        if (i > 9)
+                        if (++i > 9)
                             break;
                     }
-                    File.Move(paramsFile, errFile + i);
+                    File.Move(usersFile, errFile + i);
                     Utilites.LogException(e);
                     return LoadBackup(id);
                 }
@@ -76,42 +118,22 @@ namespace _1xParser
                     return true;
                 else
                 {
-                    m_params = new ParamsObj();
-                    SaveParams();
+                    m_users = new UsersObj();
+                    SaveUsers();
                 }
 
-                lastSavedParams = m_params;
                 return false;
             }
         }
-        static bool LoadBackup(byte id = 0)
+        public static void SaveUsers()
         {
-            if (Directory.Exists(backupDir) && id < 10)
+            if (File.Exists(usersFile))
             {
-                List<string> files = new List<string>(Directory.GetFiles(backupDir, "*.xml.*"));
-
-                if (files.Count > 0)
-                {
-                    Utilites.LogWarning("Loading Backup");
-                    files.Sort((a, b) => a.CompareTo(b));
-                    files.Reverse();
-
-                    File.Copy(files[id], paramsFile);
-                    id++;
-                    return LoadParams(id);
-                }
-            }
-            return false;
-        }
-        public static void SaveParams()
-        {
-            Utilites.Log("Saving Settings");
-            if (File.Exists(paramsFile))
-            {
-                if (lastSavedParams.Equals(m_params))
+                if (m_users == null || (lastSavedUsers != null && lastSavedUsers.Equals(m_users)))
                     return;
 
-                string backupFile = backupDir + "/" + paramsFile + ".";
+                Utilites.Log("Сохраняю список пользователей...");
+                string backupFile = backupDir + "/" + usersFile + ".";
                 Directory.CreateDirectory(backupDir);
 
                 List<string> files = new List<string>(Directory.GetFiles(backupDir, "*.xml.*"));
@@ -143,41 +165,75 @@ namespace _1xParser
                     }
                 }
 
-                File.Move(paramsFile, backupFile);
+                File.Move(usersFile, backupFile);
             }
 
-            XmlSerializer formatter = new XmlSerializer(typeof(ParamsObj));
-            using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
+            XmlSerializer formatter = new XmlSerializer(typeof(UsersObj));
+            using (FileStream fs = new FileStream(usersFile, FileMode.OpenOrCreate))
             {
-                formatter.Serialize(fs, m_params);
+                formatter.Serialize(fs, m_users);
             }
-            using (FileStream fs = new FileStream(paramsFile, FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(usersFile, FileMode.OpenOrCreate))
             {
-                lastSavedParams = (ParamsObj)formatter.Deserialize(fs);
+                lastSavedUsers = (UsersObj)formatter.Deserialize(fs);
             }
+        }
+
+        static bool LoadBackup(byte id = 0)
+        {
+            if (Directory.Exists(backupDir) && id < 10)
+            {
+                List<string> files = new List<string>(Directory.GetFiles(backupDir, usersFile + ".*"));
+
+                if (files.Count > 0)
+                {
+                    Utilites.LogWarning("Загружаю бекап файла списка пользователей");
+                    files.Sort((a, b) => a.CompareTo(b));
+                    files.Reverse();
+
+                    File.Copy(files[id], usersFile);
+                    id++;
+                    return LoadUsers(id);
+                }
+            }
+            return false;
         }
     }
     [Serializable]
     public class ParamsObj
     {
-        public string telegToken = "602929280:AAGde65bQYkgiqEZSD5eoJn2SSIvIOitg90";
-        public List<int> users = new List<int>();
-        public int lastUMid = -1; //Last upd message id
-        public string proxyIP = "";
-        public int proxyPort = 0;
+        public string telegToken = "Сюда";
+
+        public bool useProxy = false;
+        public string proxyIP = "0.0.0.0";
+        public int proxyPort = 1234;
 
         public bool Equals(ParamsObj obj)
         {
-            if (telegToken == obj.telegToken
-                && users.ToString() == obj.users.ToString()
-                && lastUMid == obj.lastUMid
+            return telegToken == obj.telegToken
+                && useProxy == obj.useProxy
                 && proxyIP == obj.proxyIP
-                && proxyPort == obj.proxyPort)
+                && proxyPort == obj.proxyPort;
+        }
+    }
+    [Serializable]
+    public class UsersObj
+    {
+        public int lastUMid = -1; //Last upd message id
+        public List<int> users = new List<int>();
+        public bool Equals(UsersObj obj)
+        {
+            bool ret = users.Count == obj.users.Count && lastUMid == obj.lastUMid;
+            if (ret)
             {
-                return true;
+                foreach (int user in obj.users)
+                {
+                    ret &= users.Contains(user);
+                    if (!ret)
+                        break;
+                }
             }
-            else
-                return false;
+            return ret;
         }
     }
 }

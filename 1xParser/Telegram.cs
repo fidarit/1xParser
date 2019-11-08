@@ -48,10 +48,11 @@ namespace _1xParser
             {
                 try
                 {
-                    string ret = Utilites.GET("https://api.telegram.org/bot" + Params.TelegToken + "/getUpdates?offset=" + (Params.LastUMid + 1).ToString());
+                    string offset = Params.LastUMid == -1 ? "" : "?offset=" + (Params.LastUMid + 1).ToString();
+                    string ret = Utilites.GET("https://api.telegram.org/bot" + Params.TelegToken + "/getUpdates" + offset);
                     jsonFormats.GetUpdResRoot obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
 
-                    if (obj != null && obj.ok)
+                    if (obj != null && obj.ok && obj.result.Length > 0)
                     {
                         for (int i = 0; i < obj.result.Length; i++)
                         {
@@ -61,6 +62,7 @@ namespace _1xParser
                             {
                                 switch (result.message.text)
                                 {
+                                    case "Старт":
                                     case "/start":
                                         if (Params.Users.Contains(id))
                                         {
@@ -70,13 +72,16 @@ namespace _1xParser
                                         {
                                             Params.Users.Add(id);
                                             SendMessage("Теперь вы будете получать рассылку", id);
+                                            Utilites.Log(result.message.from.first_name + " добавлен в список пользователей");
                                         }
                                         break;
+                                    case "Стоп":
                                     case "/stop":
                                         if (Params.Users.Contains(id))
                                         {
                                             Params.Users.Remove(id);
                                             SendMessage("Теперь вы не будете получать рассылку", id);
+                                            Utilites.Log(result.message.from.first_name + " удалён из списка пользователей");
                                         }
                                         else
                                         {
@@ -84,7 +89,7 @@ namespace _1xParser
                                         }
                                         break;
                                     default:
-                                        SendMessageToAll("Извините, но пока я вас не понимаю...");
+                                        SendMessage("Извините, но пока я вас не понимаю...", id);
                                         Utilites.LogWarning(result.message.from.first_name + " пишет: " + result.message.text);
                                         break;
                                 }

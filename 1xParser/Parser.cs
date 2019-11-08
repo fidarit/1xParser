@@ -1,7 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Web.Script.Serialization;
 
 namespace _1xParser
@@ -13,9 +10,9 @@ namespace _1xParser
         public static void ParseLine(int ID = -1)
         {
             if (lastLNParseTime.AddSeconds(5) > DateTime.Now)
-                Thread.Sleep(4000);
+                return;
 
-            Utilites.Log("Parsing Line Page");
+            Utilites.Log("Проверяю страницу \"Линия\"");
             jsonFormats.ValueLN[] objs;
             try
             {
@@ -43,9 +40,11 @@ namespace _1xParser
                 if (obj.E == null)
                     continue;
 
+                bool containsGame;
                 lock (Program.gamesLocker)
                 {
-                    resObj = Program.games.ContainsKey(id) ? Program.games[id] : new Game();
+                    containsGame = Program.games.ContainsKey(id);
+                    resObj = containsGame ? Program.games[id] : new Game();
 
                     resObj.league = obj.L;
                     resObj.startTimeUNIX = obj.S;
@@ -112,7 +111,7 @@ namespace _1xParser
                         resObj.algActived[2] = true;
                     }
                 }
-                else
+                else if(!containsGame)
                 {
                     int rand = (int)(new Random().NextDouble() * 150);
                     Task task = new Task
@@ -126,9 +125,6 @@ namespace _1xParser
             }
             //
 
-            JavaScriptSerializer scriptSerializer = new JavaScriptSerializer();
-            File.WriteAllText("games.txt", scriptSerializer.Serialize(Program.games.Values));
-
             lastLNParseTime = DateTime.Now;
         }
         public static void ParseLive()
@@ -136,7 +132,7 @@ namespace _1xParser
             if (lastLVParseTime.AddSeconds(5) > DateTime.Now)
                 return;
 
-            Utilites.Log("Parsing Live Page");
+            Utilites.Log("Проверяю страницу \"Live\"");
             jsonFormats.ValueLV[] objs;
             try
             {
@@ -157,7 +153,7 @@ namespace _1xParser
             for (int i = 0; i < objs.Length; i++)
             {
                 jsonFormats.ValueLV obj = objs[i];
-                long id = obj.N;
+                int id = obj.N;
                 Game resObj;
 
                 obj.E = RebuidE_array(obj.E);
@@ -195,8 +191,7 @@ namespace _1xParser
                         }
                     }
 
-                    if(resObj.gameTime > 1000 
-                        && obj.SC != null && obj.SC.PS != null && obj.SC.PS.Length > 0)
+                    if(obj.SC != null && obj.SC.PS != null && obj.SC.PS.Length > 0)
                     {
                         resObj.teams[0].goals1T = obj.SC.PS[0].Value.S1;
                         resObj.teams[1].goals1T = obj.SC.PS[0].Value.S2;
@@ -229,12 +224,16 @@ namespace _1xParser
                 }
 
                 jsonFormats.E[] es = new jsonFormats.E[Tmax];
+                for(int i = 0; i < Tmax; i++)
+                {
+                    es[i] = new jsonFormats.E();
+                }
 
                 foreach (jsonFormats.E em in e)
                 {
                     es[em.T - 1] = em;
                 }
-                return e;
+                return es;
             }
             catch(Exception ex)
             {

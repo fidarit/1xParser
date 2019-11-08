@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace _1xParser
 {
@@ -40,10 +36,11 @@ namespace _1xParser
 
                 if (rec.Length > 0)
                 {
-                    Telegram.SendMessageToAll("Алгоритм - \"Тотал Матча\""
+                    ret = Telegram.SendMessageToAll("Алгоритм - \"Тотал Матча\""
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
                         + "\nВремя - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
+                        + "\nСчёт - \"" + game.teams[0].goals1T + ":" + game.teams[1].goals1T + "\""
                         + "\n"
                         + "\nНачальный тотал -  \"" + game.totalF + "\""
                         + "\n"
@@ -100,6 +97,7 @@ namespace _1xParser
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
                         + "\nВремя - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
+                        + "\nСчёт - \"" + game.teams[0].goals1T + ":" + game.teams[1].goals1T + "\""
                         + "\n"
                         + "\nНачальный тотал -  \"" + totalF + "\""
                         + "\n"
@@ -174,6 +172,7 @@ namespace _1xParser
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
                         + "\nВремя - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
+                        + "\nСчёт - \"" + game.teams[0].goals1T + ":" + game.teams[1].goals1T + "\""
                         + "\n"
                         + "\nНачальный тотал -  \"" + totalMF + "\""
                         + "\n"
