@@ -26,7 +26,8 @@ namespace _1xParser
                 {
                     Utilites.Log("Запуск программы");
                     games = new Dictionary<int, Game>();
-                    
+                    TasksMgr.doOtherThreads = true;
+
                     if (!Params.LoadParams())
                     {
                         Utilites.LogError("Файл настроек не обнаружен - \"params.xml\", создаю новый...");
@@ -43,7 +44,7 @@ namespace _1xParser
                         Console.ReadKey();
                         return -1;
                     }
-
+                   
                     Utilites.Log("Нажмите Ctrl + C чтобы сохранить список пользователей");
 
                     Utilites.Log("Запускаю сервисы Telegram");
@@ -56,7 +57,7 @@ namespace _1xParser
                     bool sleepAgain = false;
                     while (!sleepAgain)
                     {
-                        lock (Program.gamesLocker)
+                        lock (gamesLocker)
                         {
                             foreach (Game game in games.Values)
                             {
@@ -71,7 +72,6 @@ namespace _1xParser
                             }
                         }
                     }
-
                 }
                 catch(Exception e)
                 {
@@ -79,49 +79,10 @@ namespace _1xParser
                 }
                 finally
                 {
-                    Close();
+                    TasksMgr.PrefClosing();
                 }
             }
             return 0;
-        }
-        static void Close()
-        {
-            Utilites.Log("Остановка фоновых задач");
-            TasksMgr.doOtherThreads = false;
-
-            if (TasksMgr.taskThread != null)
-                if(TasksMgr.taskThread.ThreadState == ThreadState.WaitSleepJoin)
-                    TasksMgr.taskThread.Interrupt();
-                else if (TasksMgr.taskThread.IsAlive)
-                    TasksMgr.taskThread.Abort();
-
-            if (TasksMgr.parsingThread != null)
-                if (TasksMgr.parsingThread.ThreadState == ThreadState.WaitSleepJoin)
-                    TasksMgr.parsingThread.Interrupt();
-                else if (TasksMgr.parsingThread.IsAlive)
-                    TasksMgr.parsingThread.Abort();
-
-            if (TasksMgr.usersSavingThread != null)
-                if (TasksMgr.usersSavingThread.ThreadState == ThreadState.WaitSleepJoin)
-                    TasksMgr.usersSavingThread.Interrupt();
-                else if (TasksMgr.usersSavingThread.IsAlive)
-                    TasksMgr.usersSavingThread.Abort();
-
-            if (Telegram.msgUpdThread != null)
-            {
-                if (Telegram.msgUpdThread.ThreadState == ThreadState.WaitSleepJoin)
-                    Telegram.msgUpdThread.Interrupt();
-                else if (Telegram.msgUpdThread.IsAlive && !Telegram.msgUpdThread.Join(2500))
-                    Telegram.msgUpdThread.Abort();
-
-                Telegram.msgUpdThread.Join();
-            }
-
-            Params.SaveUsers();
-
-            Utilites.Log("Завершение работы");
-            //Console.WriteLine("Press any key to exit...");
-            //Console.ReadKey();
         }
 
         public delegate bool HandlerRoutine(CtrlTypes CtrlType);
@@ -155,7 +116,7 @@ namespace _1xParser
                 case CtrlTypes.CTRL_LOGOFF_EVENT:
                 case CtrlTypes.CTRL_SHUTDOWN_EVENT:
                     doItAll = false;
-                    Close();
+                    TasksMgr.PrefClosing();
                     Thread.Sleep(1500);
                     return true;
                 case CtrlTypes.CTRL_C_EVENT:

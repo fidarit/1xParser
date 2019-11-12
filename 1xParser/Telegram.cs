@@ -38,8 +38,12 @@ namespace _1xParser
         }
         public static void StartMsgUpd()
         {
-            msgUpdThread = new Thread(MsgUpd);
-            msgUpdThread.Start();
+            if (msgUpdThread == null || !msgUpdThread.IsAlive)
+            {
+                msgUpdThread = new Thread(MsgUpd);
+                msgUpdThread.Name += " Telegram Messages Upd";
+                msgUpdThread.Start();
+            }
         }
         static void MsgUpd()
         {

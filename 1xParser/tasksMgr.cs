@@ -15,24 +15,18 @@ namespace _1xParser
         static readonly List<Task> tasks = new List<Task>();
         static readonly object tasksLocker = new object();
 
-        static bool parsingStarted = false;
-        static readonly EventWaitHandle parsingThrEv = new EventWaitHandle(false, EventResetMode.ManualReset);
-        public static bool doOtherThreads = true;
+        public static bool doOtherThreads;
         public static Thread taskThread;
         public static Thread parsingThread;
         public static Thread usersSavingThread;
 
         public static void StartLineParsing()
         {
-            if (!parsingStarted)
+            if (parsingThread == null || !parsingThread.IsAlive)
             {
-                if (parsingThread == null || !parsingThread.IsAlive)
-                {
-                    parsingThread = new Thread(LineParsing);
-                    parsingThread.Name += " Line Parsing Thread";
-                    parsingThread.Start();
-                }
-                else parsingThrEv.Set();
+                parsingThread = new Thread(LineParsing);
+                parsingThread.Name += " Line Parsing Thread";
+                parsingThread.Start();
             }
         }
         public static void AddTask(Task task)
@@ -58,9 +52,13 @@ namespace _1xParser
         }
         public static void StartUsersSaving()
         {
-            usersSavingThread = new Thread(UsersSaving);
-            usersSavingThread.Name += " Users Saving Thread";
-            usersSavingThread.Start();
+            if (usersSavingThread == null || !usersSavingThread.IsAlive)
+            {
+                usersSavingThread = new Thread(UsersSaving);
+                usersSavingThread.Name += " Users Saving Thread";
+                usersSavingThread.Start();
+
+            }
         }
         static void LineParsing()
         {
@@ -68,12 +66,9 @@ namespace _1xParser
             {
                 while (doOtherThreads)
                 {
-                    parsingStarted = true;
-
                     Parser.ParseLine();
 
-                    parsingStarted = false;
-                    parsingThrEv.WaitOne(200000); //3 min 20 sec
+                    Thread.Sleep(200000); //3 min 20 sec
                 }
             }
             catch (Exception e)
@@ -97,6 +92,54 @@ namespace _1xParser
                 Utilites.LogException(e);
             }
         }
+        public static void PrefClosing()
+        {
+            Utilites.Log("Остановка фоновых задач");
+            doOtherThreads = false;
+            Program.games.Clear();
+            tasks.Clear();
+
+            if (taskThread != null)
+                if (taskThread.ThreadState == ThreadState.WaitSleepJoin)
+                    taskThread.Interrupt();
+                else if (taskThread.IsAlive)
+                    taskThread.Abort();
+
+            if (parsingThread != null)
+                if (parsingThread.ThreadState == ThreadState.WaitSleepJoin)
+                    parsingThread.Interrupt();
+                else if (parsingThread.IsAlive)
+                    parsingThread.Abort();
+
+            if (Telegram.msgUpdThread != null)
+            {
+                if (Telegram.msgUpdThread.ThreadState == ThreadState.WaitSleepJoin)
+                    Telegram.msgUpdThread.Interrupt();
+                else if (Telegram.msgUpdThread.IsAlive && !Telegram.msgUpdThread.Join(2500))
+                    Telegram.msgUpdThread.Abort();
+
+                if (Telegram.msgUpdThread.IsAlive)
+                {
+                    Telegram.msgUpdThread.Join();
+                }
+            }
+            if (usersSavingThread != null)
+            {
+                if (usersSavingThread.ThreadState == ThreadState.WaitSleepJoin)
+                    usersSavingThread.Interrupt();
+                else if (usersSavingThread.IsAlive && !usersSavingThread.Join(2500))
+                    usersSavingThread.Abort();
+
+                if (usersSavingThread.IsAlive)
+                {
+                    usersSavingThread.Join();
+                }
+            }
+
+            Params.SaveUsers();
+
+            Utilites.Log("Завершение работы");
+        }
         static void DoIt()
         {
             try
@@ -114,11 +157,7 @@ namespace _1xParser
 
                     try
                     {
-                        if (task.Func != null)
-                            task.Func(task.GameID);
-                        else
-                            parsingThrEv.Set();
-
+                        task.Func(task.GameID);
                     }
                     catch (Exception e)
                     {
