@@ -26,13 +26,13 @@ namespace _1xParser
         {
             if (!parsingStarted)
             {
-                if (parsingThread == null)
+                if (parsingThread == null || !parsingThread.IsAlive)
                 {
                     parsingThread = new Thread(LineParsing);
                     parsingThread.Name += " Line Parsing Thread";
+                    parsingThread.Start();
                 }
                 else parsingThrEv.Set();
-                if (!parsingThread.IsAlive) parsingThread.Start();
             }
         }
         public static void AddTask(Task task)

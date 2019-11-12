@@ -29,9 +29,9 @@ namespace _1xParser
 
                 double deltaTotal = game.totalL - game.totalF;
                 string rec = "";
-                if (deltaTotal >= 8)
+                if (deltaTotal >= 7)
                     rec = "ТМ " + game.totalL + " - " + game.TkfLess;
-                else if (deltaTotal <= -7)
+                else if (deltaTotal <= -6)
                     rec = "ТБ " + game.totalL + " - " + game.TkfMore;
 
                 if (rec.Length > 0)
@@ -86,9 +86,9 @@ namespace _1xParser
                 double totalL = Math.Round(game.totalL / 2);
                 double deltaTotal = totalF - totalL;
                 string rec = "";
-                if (deltaTotal >= 6)
+                if (deltaTotal >= 5)
                     rec = "ТМ " + totalL + " - " + game.TkfLess;
-                else if (deltaTotal <= -5)
+                else if (deltaTotal <= -4)
                     rec = "ТБ " + totalL + " - " + game.TkfLess;
 
                 if (rec.Length > 0)

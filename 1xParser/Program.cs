@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace _1xParser
@@ -16,6 +17,8 @@ namespace _1xParser
         {
             handlerRoutine = new HandlerRoutine(ConsoleCtrlCheck);
             SetConsoleCtrlHandler(handlerRoutine, true);
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.WriteLine(Console.OutputEncoding.EncodingName);
 
             while (doItAll)
             {
@@ -53,15 +56,18 @@ namespace _1xParser
                     bool sleepAgain = false;
                     while (!sleepAgain)
                     {
-                        foreach (Game game in games.Values)
+                        lock (Program.gamesLocker)
                         {
-                            sleepAgain |= game.algActived[0] | game.algActived[1] | game.algActived[2]; //если есть активные алгоритмы
-                            int time = game.startTimeUNIX - Utilites.NowUNIX();
-                            sleepAgain |= time > 0 && time < 300; //или в течении пяти минут начнется игра
-                            if (sleepAgain)
+                            foreach (Game game in games.Values)
                             {
-                                Thread.Sleep(500000); //то подождать ещё 8,333 мин
-                                break;
+                                sleepAgain |= game.algActived[0] | game.algActived[1] | game.algActived[2]; //если есть активные алгоритмы
+                                int time = game.startTimeUNIX - Utilites.NowUNIX();
+                                sleepAgain |= time > 0 && time < 300; //или в течении пяти минут начнется игра
+                                if (sleepAgain)
+                                {
+                                    Thread.Sleep(500000); //то подождать ещё 8,333 мин
+                                    break;
+                                }
                             }
                         }
                     }
@@ -94,6 +100,12 @@ namespace _1xParser
                     TasksMgr.parsingThread.Interrupt();
                 else if (TasksMgr.parsingThread.IsAlive)
                     TasksMgr.parsingThread.Abort();
+
+            if (TasksMgr.usersSavingThread != null)
+                if (TasksMgr.usersSavingThread.ThreadState == ThreadState.WaitSleepJoin)
+                    TasksMgr.usersSavingThread.Interrupt();
+                else if (TasksMgr.usersSavingThread.IsAlive)
+                    TasksMgr.usersSavingThread.Abort();
 
             if (Telegram.msgUpdThread != null)
             {
