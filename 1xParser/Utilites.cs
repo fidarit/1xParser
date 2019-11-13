@@ -27,7 +27,8 @@ namespace _1xParser
                     {
                         using (WebClient client = new WebClient())
                         {
-                            client.Encoding = Encoding.UTF8;
+                            client.Encoding = Encoding.GetEncoding(1251);
+                            //client.Encoding = Encoding.UTF8;
                             client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
                             Stream data = client.OpenRead(url);
                             StreamReader reader = new StreamReader(data, Encoding.UTF8);
@@ -63,8 +64,9 @@ namespace _1xParser
                     req.UseDefaultCredentials = true;
                     req.Method = "POST";
                     req.Timeout = 10000;
-                    req.ContentType = "application/x-www-form-urlencoded";
-                    byte[] sentData = Encoding.UTF8.GetBytes(data);
+                    req.ContentType = "application/x-www-form-urlencoded"; 
+                    byte[] sentData = Encoding.GetEncoding(1251).GetBytes(data);
+                    //byte[] sentData = Encoding.UTF8.GetBytes(data);
                     req.ContentLength = sentData.Length;
                     Stream sendStream = req.GetRequestStream();
                     sendStream.Write(sentData, 0, sentData.Length);

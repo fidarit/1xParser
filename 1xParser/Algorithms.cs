@@ -75,7 +75,7 @@ namespace _1xParser
             if (game.updTimeUNIX + 30 > Utilites.NowUNIX() && game.totalF * game.totalL > 0)
             {
                 string team1 = game.teams[0].name;
-                string team2 = game.teams[1].name;
+                string team2 = game.teams[1].name;  
                 if (game.teams[0].kf * game.teams[1].kf > 0)
                 {
                     team1 += " (" + game.teams[0].kf + ")";
@@ -84,7 +84,7 @@ namespace _1xParser
 
                 double totalF = Math.Round(game.totalF / 2);
                 double totalL = Math.Round(game.totalL / 2);
-                double deltaTotal = totalF - totalL;
+                double deltaTotal =  totalL - totalF;
                 string rec = "";
                 if (deltaTotal >= 5)
                     rec = "ТМ " + totalL + " - " + game.TkfLess;

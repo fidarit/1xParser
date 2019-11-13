@@ -67,6 +67,7 @@ namespace _1xParser
                                 switch (result.message.text)
                                 {
                                     case "Старт":
+                                    case "cтарт":
                                     case "/start":
                                         if (Params.Users.Contains(id))
                                         {
@@ -80,6 +81,7 @@ namespace _1xParser
                                         }
                                         break;
                                     case "Стоп":
+                                    case "cтоп":
                                     case "/stop":
                                         if (Params.Users.Contains(id))
                                         {

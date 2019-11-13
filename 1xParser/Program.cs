@@ -17,9 +17,11 @@ namespace _1xParser
         {
             handlerRoutine = new HandlerRoutine(ConsoleCtrlCheck);
             SetConsoleCtrlHandler(handlerRoutine, true);
+#if DEBUG
+#else
             Console.OutputEncoding = Encoding.UTF8;
             Console.WriteLine(Console.OutputEncoding.EncodingName);
-
+#endif
             while (doItAll)
             {
                 try

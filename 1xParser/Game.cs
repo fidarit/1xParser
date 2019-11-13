@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace _1xParser
+﻿namespace _1xParser
 {
     class Game
     {
