@@ -11,6 +11,7 @@ namespace _1xParser
         static readonly DateTime unixHelper = new DateTime(1970, 1, 1);
         static readonly object getHtmlLocker = new object();
         static readonly object getPostLocker = new object();
+        const string logsFileName = "logs.txt";
 
         public static int NowUNIX()
         {
@@ -98,34 +99,6 @@ namespace _1xParser
             }
             return Out;
         }
-        public static string GET(string url)
-        {
-            string Out = "";
-            try
-            {
-                lock (getPostLocker)
-                {
-                    WebRequest req = WebRequest.Create(url);
-                    if (Params.UseProxy)
-                    {
-                        req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
-                        req.Proxy.Credentials = CredentialCache.DefaultCredentials;
-                    }
-                    req.UseDefaultCredentials = true;
-                    req.Timeout = 10000;
-                    WebResponse resp = req.GetResponse();
-                    Stream stream = resp.GetResponseStream();
-                    StreamReader sr = new StreamReader(stream);
-                    Out = sr.ReadToEnd();
-                    sr.Close();
-                }
-            }
-            catch (Exception e)
-            {
-                LogException(e);
-            }
-            return Out;
-        }
 
         public static void LogException(Exception e)
         {
@@ -138,11 +111,13 @@ namespace _1xParser
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             WriteLine(msg);
+            SaveToFileErrsAndWarnings(msg);
         }
         public static void LogError(string msg)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             WriteLine(msg);
+            SaveToFileErrsAndWarnings(msg);
         }
         public static void Log(string msg)
         {
@@ -152,8 +127,23 @@ namespace _1xParser
 
         static void WriteLine(string msg)
         {
-            Console.WriteLine(DateTime.Now.ToShortDateString() + " "
-                + DateTime.Now.ToLongTimeString() + " " + msg);
+            Console.WriteLine(GetConsolePrefix() + msg);
+        }
+        static string GetConsolePrefix()
+        {
+            return DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " ";
+        }
+        static void SaveToFileErrsAndWarnings(string msg)
+        {
+            try
+            {
+                File.AppendAllText(logsFileName, GetConsolePrefix() + msg + Environment.NewLine);
+            }
+            catch(Exception e)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                WriteLine(e.Message);
+            }
         }
     }
 }

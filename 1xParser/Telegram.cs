@@ -91,8 +91,8 @@ namespace _1xParser
             {
                 try
                 {
-                    string offset = Params.LastUMid == -1 ? "" : "?offset=" + (Params.LastUMid + 1).ToString();
-                    string ret = Utilites.GET("https://api.telegram.org/bot" + Params.TelegToken + "/getUpdates" + offset);
+                    string offset = Params.LastUMid == -1 ? "" : "offset=" + (Params.LastUMid + 1).ToString();
+                    string ret = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/getUpdates", offset);
                     jsonFormats.GetUpdResRoot obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
 
                     if (obj != null && obj.ok && obj.result.Length > 0)
