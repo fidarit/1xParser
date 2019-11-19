@@ -9,31 +9,70 @@ namespace _1xParser
     static class Telegram
     {
         public static Thread msgUpdThread;
+        static readonly object paramsUsersLock = new object();
 
+        public static bool EditMessage(string text, int targetID, int msgID)
+        {
+            string eText = HttpUtility.UrlEncode(text, Encoding.UTF8);
+
+            eText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/editMessageText",
+                "chat_id=" + targetID + "message_id=" + msgID + "&text=" + eText);
+
+            return eText.Length > 10;
+        }
         public static int SendMessage(string text, int targetID)
         {
             string eText = HttpUtility.UrlEncode(text, Encoding.UTF8);
-            DateTime time = DateTime.Now;
 
             eText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/sendMessage",
                 "chat_id=" + targetID + "&text=" + eText);
 
-            int sleepTime = (int)(time.AddMilliseconds(33) - DateTime.Now).TotalMilliseconds;
-            if (sleepTime > 0) Thread.Sleep(sleepTime);
-
             if (eText.Length > 10)
-                return 0;
-            else
-                return 1;
-        }
-        public static int SendMessageToAll(string text)
-        {
-            int ret = Params.Users.Count;
-            for (int i = 0; i < Params.Users.Count; i++)
             {
-                ret *= SendMessage(text, Params.Users[i]);
-            }
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                jsonFormats.SendMsgResRoot obj = serializer.Deserialize<jsonFormats.SendMsgResRoot>(eText);
 
+                if (obj.result != null && obj.result.message_id >= 0)
+                    return obj.result.message_id;
+                else
+                    return -1;
+            }
+            else
+                return -1;
+        }
+        public static bool SendMessageToEveryone(string text)
+        {
+            bool ret = true;
+            lock (paramsUsersLock)
+            {
+                for (int i = 0; i < Params.Users.Count; i++)
+                {
+                    ret &= SendMessage(text, Params.Users[i]) != -1;
+                }
+            }
+            return ret;
+        }
+        public static bool SendMessagesFromAlgs(string text, int algoritm, int gameID)
+        {
+            bool ret = true;
+            lock (paramsUsersLock)
+            {
+                for (int i = 0; i < Params.Users.Count; i++)
+                {
+                    int result = SendMessage(text, Params.Users[i]);
+                    if (result != -1)
+                    {
+                        Message message = new Message() { 
+                            chatID = Params.Users[i],
+                            msgID = result
+                        };
+                        Program.games[gameID].algoritms[algoritm - 1].messages.Add(message);
+                        Program.games[gameID].algoritms[algoritm - 1].messageText = text;
+                    }
+                    else
+                        ret &= false;
+                }
+            }
             return ret;
         }
         public static void StartMsgUpd()

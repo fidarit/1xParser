@@ -55,6 +55,7 @@ namespace _1xParser
             {
                 lock (getPostLocker)
                 {
+                    DateTime time = DateTime.Now;
                     WebRequest req = WebRequest.Create(url);
                     if (Params.UseProxy)
                     {
@@ -84,6 +85,11 @@ namespace _1xParser
                             count = sr.Read(read, 0, 256);
                         }
                     }
+
+                    //К API Telegram разрешено обращаться примерно 30 раз в сек,
+                    //поэтому на всяк случай отправляем поток на сон на 33 мс
+                    int sleepTime = (int)(time.AddMilliseconds(33) - DateTime.Now).TotalMilliseconds;
+                    if (sleepTime > 0) Thread.Sleep(sleepTime);
                 }
             }
             catch (Exception e)

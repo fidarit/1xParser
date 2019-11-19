@@ -20,7 +20,6 @@ namespace _1xParser
 #if DEBUG
 #else
             Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine(Console.OutputEncoding.EncodingName);
 #endif
             while (doItAll)
             {
@@ -62,8 +61,8 @@ namespace _1xParser
                         lock (gamesLocker)
                         {
                             foreach (Game game in games.Values)
-                            {
-                                sleepAgain |= game.algActived[0] | game.algActived[1] | game.algActived[2]; //если есть активные алгоритмы
+                            {   //если есть активные алгоритмы
+                                sleepAgain |= game.algoritms[0].actived | game.algoritms[1].actived | game.algoritms[2].actived;
                                 int time = game.startTimeUNIX - Utilites.NowUNIX();
                                 sleepAgain |= time > 0 && time < 300; //или в течении пяти минут начнется игра
                                 if (sleepAgain)
