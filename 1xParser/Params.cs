@@ -31,6 +31,11 @@ namespace _1xParser
             get { return m_users.lastUMid; }
             set { m_users.lastUMid = value; }
         }
+        public static uint LastSignalNumer
+        {
+            get { return m_users.lastSignalNumer; }
+            set { m_users.lastSignalNumer = value; }
+        }
         public static bool UseProxy
         {
             get { return m_params.useProxy; }
@@ -219,7 +224,8 @@ namespace _1xParser
     [Serializable]
     public class UsersObj
     {
-        public int lastUMid = -1; //Last upd message id
+        public int lastUMid = -1;       //Last upd message id
+        public uint lastSignalNumer = 0;
         public List<int> users = new List<int>();
         public bool Equals(UsersObj obj)
         {

@@ -81,7 +81,7 @@ namespace _1xParser
                         task = new Task
                         {
                             GameID = id,
-                            TimeUNIX = game.startTimeUNIX + 3600, //60 min
+                            TimeUNIX = game.startTimeUNIX + 3660, //61 min
                             Func = Algorithms.CheckOnTheEnd
                         };
                         TasksMgr.AddTask(task);

@@ -43,9 +43,11 @@ namespace _1xParser
                     //Calculating rate
                     //
                     double rate = game.teams[0].goals1T + game.teams[1].goals1T;
-                    rate -= Math.Round((double) game.gameTime / 60) * game.totalF / 60;
+                    //оставить 2 знака после запятой ииии 1800=60*60 из уравнения клиента
+                    rate -= Math.Round(game.totalF * game.gameTime / 3600, 2);
 
-                    string text = "Алгоритм - \"Тотал Матча\""
+                    string text = "#" + Params.LastSignalNumer
+                            + "\nАлгоритм - \"Тотал Матча\""
                             + "\nЛига - \"" + game.league + "\""
                             + "\nКоманда - \"" + team1 + " - " + team2 + "\""
                             + "\nВремя - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
@@ -72,6 +74,8 @@ namespace _1xParser
                         GameID = id
                     });
                 }
+                else //if signal was succesful sended to anybody
+                    Params.LastSignalNumer++;
             }
         }
         public static void SecondAlg(int id)
@@ -115,9 +119,11 @@ namespace _1xParser
                     //Calculating rate
                     //
                     double rate = game.teams[0].goals1T + game.teams[1].goals1T;
-                    rate -= Math.Round((double)game.gameTime / 60) * game.totalF / 30;
+                    //оставить 2 знака после запятой ииии 1800=30*60 из уравнения клиента
+                    rate -= Math.Round(game.totalF * game.gameTime / 1800, 2); 
 
-                    string text = "Алгоритм - \"Тотал в 1 тайме\""
+                    string text = "#" + Params.LastSignalNumer
+                        + "\nАлгоритм - \"Тотал в 1 тайме\""
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
                         + "\nВремя - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
@@ -144,6 +150,8 @@ namespace _1xParser
                         GameID = id
                     });
                 }
+                else //if signal was succesful sended to anybody
+                    Params.LastSignalNumer++;
             }
         }
         public static void ThirdAlg(int id)
@@ -197,7 +205,8 @@ namespace _1xParser
                     Program.games[id].algoritms[2].sendedTotal = game.iTotalL;
                     Program.games[id].algoritms[2].tMore = true;
 
-                    string text = "Алгоритм - \"Индивидуальный тотал Фаворита\""
+                    string text = "#" + Params.LastSignalNumer
+                        + "\nАлгоритм - \"Индивидуальный тотал Фаворита\""
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
                         + "\nВремя - \"" + TimeSpan.FromSeconds(game.gameTime).ToString("mm\\:ss") + "\""
@@ -210,7 +219,8 @@ namespace _1xParser
                         + "\nРекомендую - \"" + recomend + "\"";
                     if (realGoals <= favGoalsAim && totalL < totalMF + realGoals)
                     {
-                        Telegram.SendMessagesFromAlgs(text, 3, id);
+                        if(Telegram.SendMessagesFromAlgs(text, 3, id))
+                            Params.LastSignalNumer++;
                     }
                 }
             }
@@ -228,7 +238,7 @@ namespace _1xParser
                 {
                     TasksMgr.AddTask(new Task
                     {
-                        TimeUNIX = Utilites.NowUNIX() + 3600 - game.gameTime,
+                        TimeUNIX = Utilites.NowUNIX() + 3660 - game.gameTime,
                         Func = CheckOnTheEnd,
                         GameID = id
                     });
