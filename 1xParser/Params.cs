@@ -229,7 +229,9 @@ namespace _1xParser
         public List<int> users = new List<int>();
         public bool Equals(UsersObj obj)
         {
-            bool ret = users.Count == obj.users.Count && lastUMid == obj.lastUMid;
+            bool ret = users.Count == obj.users.Count;
+            ret &= lastUMid == obj.lastUMid;
+            ret &= lastSignalNumer == obj.lastSignalNumer;
             if (ret)
             {
                 foreach (int user in obj.users)

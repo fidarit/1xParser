@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace _1xParser
 {
@@ -19,6 +20,9 @@ namespace _1xParser
                 {
                     string team1 = game.teams[0].name;
                     string team2 = game.teams[1].name;
+
+                    Utilites.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Тотал Матча\"");
+
                     if (game.teams[0].kf * game.teams[1].kf > 0)
                     {
                         team1 += " (" + game.teams[0].kf + ")";
@@ -46,7 +50,7 @@ namespace _1xParser
                     //оставить 2 знака после запятой ииии 1800=60*60 из уравнения клиента
                     rate -= Math.Round(game.totalF * game.gameTime / 3600, 2);
 
-                    string text = "#" + Params.LastSignalNumer
+                    string text = "#Signal_" + Params.LastSignalNumer
                             + "\nАлгоритм - \"Тотал Матча\""
                             + "\nЛига - \"" + game.league + "\""
                             + "\nКоманда - \"" + team1 + " - " + team2 + "\""
@@ -88,11 +92,14 @@ namespace _1xParser
                 if (game.gameTime > 1200) //20 min
                     return;
 
-                bool ret = true;
+                bool ret = false;
                 if (game.updTimeUNIX + 30 > Utilites.NowUNIX() && game.totalF * game.totalL > 0)
                 {
                     string team1 = game.teams[0].name;
                     string team2 = game.teams[1].name;
+
+                    Utilites.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Тотал в 1 тайме\"");
+
                     if (game.teams[0].kf * game.teams[1].kf > 0)
                     {
                         team1 += " (" + game.teams[0].kf + ")";
@@ -122,7 +129,7 @@ namespace _1xParser
                     //оставить 2 знака после запятой ииии 1800=30*60 из уравнения клиента
                     rate -= Math.Round(game.totalF * game.gameTime / 1800, 2); 
 
-                    string text = "#" + Params.LastSignalNumer
+                    string text = "#Signal_" + Params.LastSignalNumer
                         + "\nАлгоритм - \"Тотал в 1 тайме\""
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
@@ -185,6 +192,9 @@ namespace _1xParser
                 {
                     string team1 = game.teams[0].name;
                     string team2 = game.teams[1].name;
+
+                    Utilites.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Индивидуальный тотал Фаворита\"");
+
                     if (game.teams[0].kf * game.teams[1].kf > 0)
                     {
                         team1 += " (" + game.teams[0].kf + ")";
@@ -205,7 +215,7 @@ namespace _1xParser
                     Program.games[id].algoritms[2].sendedTotal = game.iTotalL;
                     Program.games[id].algoritms[2].tMore = true;
 
-                    string text = "#" + Params.LastSignalNumer
+                    string text = "#Signal_" + Params.LastSignalNumer
                         + "\nАлгоритм - \"Индивидуальный тотал Фаворита\""
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
@@ -245,6 +255,9 @@ namespace _1xParser
                     return;
                 }
                 //
+                string yes = Encoding.UTF8.GetString(new byte[] { 0xE2, 0x9C, 0x85 });
+                string not = Encoding.UTF8.GetString(new byte[] { 0xE2, 0x9D, 0x8E });
+
                 string text;
                 double goals;
                 Algoritm algoritm;
@@ -257,9 +270,13 @@ namespace _1xParser
 
                     if ((algoritm.tMore && goals > algoritm.sendedTotal)
                         || (!algoritm.tMore && goals < algoritm.sendedTotal))
-                        text += ":white_check_mark:";
+                        text += yes;
                     else
-                        text += ":x:";
+                        text += not;
+
+                    text += " " + goals;
+                    
+                    Utilites.Log("Редактирую сообщения");
 
                     foreach (Message message in algoritm.messages)
                     {
@@ -277,10 +294,12 @@ namespace _1xParser
                     if ((algoritm.tMore && goals > algoritm.sendedTotal)
                         || (!algoritm.tMore && goals < algoritm.sendedTotal))
                     {
-                        text += ":white_check_mark:";
+                        text += yes;
                     }
                     else
-                        text += ":x:";
+                        text += not;
+
+                    text += " " + goals;
 
                     foreach (Message message in algoritm.messages)
                     {
@@ -296,9 +315,11 @@ namespace _1xParser
                     goals = game.teams[game.favTeam - 1].goals1T;
 
                     if (goals > algoritm.sendedTotal)
-                        text += ":white_check_mark:";
+                        text += yes;
                     else
-                        text += ":x:";
+                        text += not;
+
+                    text += " " + goals;
 
                     foreach (Message message in algoritm.messages)
                     {

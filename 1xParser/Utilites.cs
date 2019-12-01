@@ -51,12 +51,12 @@ namespace _1xParser
         }
         public static string Post(string url, string data)
         {
+            DateTime time = DateTime.Now;
             string Out = "";
             try
             {
                 lock (getPostLocker)
                 {
-                    DateTime time = DateTime.Now;
                     WebRequest req = WebRequest.Create(url);
                     if (Params.UseProxy)
                     {
@@ -86,17 +86,24 @@ namespace _1xParser
                             count = sr.Read(read, 0, 256);
                         }
                     }
-
-                    //К API Telegram разрешено обращаться примерно 30 раз в сек,
-                    //поэтому на всяк случай отправляем поток на сон на 33 мс
-                    int sleepTime = (int)(time.AddMilliseconds(33) - DateTime.Now).TotalMilliseconds;
-                    if (sleepTime > 0) Thread.Sleep(sleepTime);
                 }
             }
             catch (Exception e)
             {
                 LogException(e);
             }
+
+            if (Out.Length < 10)
+            {
+                string s = string.Format("Что-то пошло не так с отправкой/получением данных: {0} {1}", url, data);
+                LogWarning(s);
+            }
+
+            //К API Telegram разрешено обращаться примерно 30 раз в сек,
+            //поэтому на всяк случай отправляем поток на сон на 35 мс
+            int sleepTime = (int)(time.AddMilliseconds(35) - DateTime.Now).TotalMilliseconds;
+            if (sleepTime > 0) Thread.Sleep(sleepTime);
+
             return Out;
         }
 

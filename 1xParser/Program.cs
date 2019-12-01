@@ -45,7 +45,7 @@ namespace _1xParser
                         Console.ReadKey();
                         return -1;
                     }
-                   
+                    
                     Utilites.Log("Нажмите Ctrl + C чтобы сохранить список пользователей");
 
                     Utilites.Log("Запускаю сервисы Telegram");

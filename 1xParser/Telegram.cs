@@ -16,7 +16,7 @@ namespace _1xParser
             string eText = HttpUtility.UrlEncode(text, Encoding.UTF8);
 
             eText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/editMessageText",
-                "chat_id=" + targetID + "message_id=" + msgID + "&text=" + eText);
+                "chat_id=" + targetID + "&message_id=" + msgID + "&text=" + eText);
 
             return eText.Length > 10;
         }
@@ -57,20 +57,26 @@ namespace _1xParser
             bool ret = true;
             lock (paramsUsersLock)
             {
+                if (Params.Users.Count > 0)
+                {
+                    Program.games[gameID].algoritms[algoritm - 1].messageText = text;
+                    ret = false;
+                }
+
                 for (int i = 0; i < Params.Users.Count; i++)
                 {
                     int result = SendMessage(text, Params.Users[i]);
                     if (result != -1)
                     {
-                        Message message = new Message() { 
+                        Message message = new Message()
+                        {
                             chatID = Params.Users[i],
                             msgID = result
                         };
                         Program.games[gameID].algoritms[algoritm - 1].messages.Add(message);
-                        Program.games[gameID].algoritms[algoritm - 1].messageText = text;
+
+                        ret |= true;
                     }
-                    else
-                        ret &= false;
                 }
             }
             return ret;

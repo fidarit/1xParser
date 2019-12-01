@@ -80,11 +80,10 @@ namespace _1xParser
         {
             try
             {
-                Thread.Sleep(30000); //30 sec
                 while (doOtherThreads)
                 {
+                    Thread.Sleep(30000); //30 sec
                     Params.SaveUsers();
-                    Thread.Sleep(600000); //10 min
                 }
             }
             catch (Exception e)

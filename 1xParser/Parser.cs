@@ -142,7 +142,7 @@ namespace _1xParser
             if (lastLVParseTime.AddSeconds(5) > DateTime.Now)
                 return;
 
-            Utilites.Log("Проверяю страницу \"Live\"");
+            //Utilites.Log("Проверяю страницу \"Live\"");
             jsonFormats.ValueLV[] results;
             try
             {
@@ -228,6 +228,8 @@ namespace _1xParser
                 string strRes = Utilites.GetHTML(url);
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 jsonFormats.GameResRootObj obj = serializer.Deserialize<jsonFormats.GameResRootObj>(strRes);
+
+                if (obj == null || obj.Value == null) return;
                 result = obj.Value;
             }
             catch (Exception e)
@@ -245,20 +247,20 @@ namespace _1xParser
                 if (!Program.games.ContainsKey(id))
                     return;
                 Game game = Program.games[id];
-                game.isFinished = result.F;
+                game.isFinished = result.F || result.SC.TS == 3600;
+
+                if (result.SC == null || result.SC.PS == null || result.SC.PS.Length == 0)
+                    return;
 
                 game.updTimeUNIX = Utilites.NowUNIX();
                 game.gameTime = result.SC.TS;
 
-                if (result.SC != null && result.SC.PS != null && result.SC.PS.Length > 0)
-                {
-                    game.teams[0].goals1T = result.SC.PS[0].Value.S1;
-                    game.teams[1].goals1T = result.SC.PS[0].Value.S2;
+                game.teams[0].goals1T = result.SC.PS[0].Value.S1;
+                game.teams[1].goals1T = result.SC.PS[0].Value.S2;
 
-                    game.teams[0].allGoals = result.SC.PS[0].Value.S1 + result.SC.PS[1].Value.S1;
-                    game.teams[1].allGoals = result.SC.PS[0].Value.S2 + result.SC.PS[1].Value.S2;
-                }
-
+                game.teams[0].allGoals = result.SC.PS[0].Value.S1 + result.SC.PS[1].Value.S1;
+                game.teams[1].allGoals = result.SC.PS[0].Value.S2 + result.SC.PS[1].Value.S2;
+                
                 Program.games[id] = game;
             }
         }
