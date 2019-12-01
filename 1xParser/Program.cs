@@ -54,20 +54,20 @@ namespace _1xParser
                     TasksMgr.StartLineParsing();
                     TasksMgr.StartUsersSaving();
 
-                    Thread.Sleep(12000000); // ждать 3.333 часа
-                    bool sleepAgain = false;
-                    while (!sleepAgain)
+                    Thread.Sleep(6 * 3600 * 1000); //ждать 6 часов
+                    bool sleepAgain = true;
+                    while (sleepAgain)
                     {
+                        sleepAgain = false;
                         lock (gamesLocker)
                         {
                             foreach (Game game in games.Values)
                             {   //если есть активные алгоритмы
                                 sleepAgain |= game.algoritms[0].actived | game.algoritms[1].actived | game.algoritms[2].actived;
-                                int time = game.startTimeUNIX - Utilites.NowUNIX();
-                                sleepAgain |= time > 0 && time < 300; //или в течении пяти минут начнется игра
+                                sleepAgain |= game.deleteFuncIsActivated;
                                 if (sleepAgain)
                                 {
-                                    Thread.Sleep(500000); //то подождать ещё 8,333 мин
+                                    Thread.Sleep(600000); //то подождать ещё 10 мин
                                     break;
                                 }
                             }

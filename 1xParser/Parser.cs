@@ -134,8 +134,8 @@ namespace _1xParser
                 }
             }
             //
-
-            lastLNParseTime = DateTime.Now;
+            if (results != null && results.Length > 0)
+                lastLNParseTime = DateTime.Now;
         }
         public static void ParseLive()
         {
@@ -216,8 +216,8 @@ namespace _1xParser
                 }
             }
             //
-
-            lastLVParseTime = DateTime.Now;
+            if (results != null && results.Length > 0)
+                lastLVParseTime = DateTime.Now;
         }
         public static void ParseEndGameResults(int id)
         {
