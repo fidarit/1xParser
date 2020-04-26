@@ -66,7 +66,7 @@ namespace _1xParser
 
                     if (recomend.Length > 0)
                     {
-                        ret = Telegram.SendMessagesFromAlgs(text, 1, id);
+                        ret = Telegram.SendMessagesFromAlgorithms(text, 1, id);
                     }
                 }
                 if (!ret)
@@ -145,7 +145,7 @@ namespace _1xParser
 
                     if (recomend.Length > 0)
                     {
-                        ret = Telegram.SendMessagesFromAlgs(text, 2, id);
+                        ret = Telegram.SendMessagesFromAlgorithms(text, 2, id);
                     }
                 }
                 if (!ret)
@@ -229,7 +229,7 @@ namespace _1xParser
                         + "\nРекомендую - \"" + recomend + "\"";
                     if (realGoals <= favGoalsAim && totalL < totalMF + realGoals)
                     {
-                        if(Telegram.SendMessagesFromAlgs(text, 3, id))
+                        if(Telegram.SendMessagesFromAlgorithms(text, 3, id))
                             Params.LastSignalNumer++;
                     }
                 }

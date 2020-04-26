@@ -13,32 +13,27 @@ namespace _1xParser
 
         public static bool EditMessage(string text, int targetID, int msgID)
         {
-            string eText = HttpUtility.UrlEncode(text, Encoding.UTF8);
+            string resultText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/editMessageText",
+                "chat_id=" + targetID + 
+                "&message_id=" + msgID + 
+                "&text=" + HttpUtility.UrlEncode(text, Encoding.UTF8));
 
-            eText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/editMessageText",
-                "chat_id=" + targetID + "&message_id=" + msgID + "&text=" + eText);
-
-            return eText.Length > 10;
+            return resultText.Length > 10;
         }
         public static int SendMessage(string text, int targetID)
         {
-            string eText = HttpUtility.UrlEncode(text, Encoding.UTF8);
+            string resultText = Utilites.Post("https://api.telegram.org/bot"
+                + Params.TelegToken + "/sendMessage",
+                "chat_id=" + targetID + 
+                "&text=" + HttpUtility.UrlEncode(text, Encoding.UTF8));
 
-            eText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/sendMessage",
-                "chat_id=" + targetID + "&text=" + eText);
-
-            if (eText.Length > 10)
-            {
-                JavaScriptSerializer serializer = new JavaScriptSerializer();
-                jsonFormats.SendMsgResRoot obj = serializer.Deserialize<jsonFormats.SendMsgResRoot>(eText);
-
-                if (obj.result != null && obj.result.message_id >= 0)
-                    return obj.result.message_id;
-                else
-                    return -1;
-            }
-            else
+            if (resultText.Length < 10)
                 return -1;
+
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            var obj = serializer.Deserialize<jsonFormats.SendMsgResRoot>(resultText);
+
+            return obj?.result.message_id ?? -1;
         }
         public static bool SendMessageToEveryone(string text)
         {
@@ -52,16 +47,15 @@ namespace _1xParser
             }
             return ret;
         }
-        public static bool SendMessagesFromAlgs(string text, int algoritm, int gameID)
+        public static bool SendMessagesFromAlgorithms(string text, int algoritm, int gameID)
         {
-            bool ret = true;
+            bool retResult = false;
             lock (paramsUsersLock)
             {
-                if (Params.Users.Count > 0)
-                {
-                    Program.games[gameID].algoritms[algoritm - 1].messageText = text;
-                    ret = false;
-                }
+                if (Params.Users.Count == 0)
+                    return true;
+
+                Program.games[gameID].algoritms[algoritm - 1].messageText = text;
 
                 for (int i = 0; i < Params.Users.Count; i++)
                 {
@@ -75,11 +69,11 @@ namespace _1xParser
                         };
                         Program.games[gameID].algoritms[algoritm - 1].messages.Add(message);
 
-                        ret |= true;
+                        retResult |= true;
                     }
                 }
             }
-            return ret;
+            return retResult;
         }
         public static void StartMsgUpd()
         {
@@ -93,13 +87,16 @@ namespace _1xParser
         static void MsgUpd()
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
+
             while (TasksMgr.doOtherThreads)
             {
                 try
                 {
-                    string offset = Params.LastUMid == -1 ? "" : "offset=" + (Params.LastUMid + 1).ToString();
-                    string ret = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/getUpdates", offset);
-                    jsonFormats.GetUpdResRoot obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
+                    string offset = Params.LastUMid == -1 ? "" : "offset=" + (Params.LastUMid + 1);
+                    string ret = Utilites.Post("https://api.telegram.org/bot"
+                        + Params.TelegToken + "/getUpdates", offset);
+
+                    var obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
 
                     if (obj != null && obj.ok && obj.result.Length > 0)
                     {
@@ -107,6 +104,7 @@ namespace _1xParser
                         {
                             jsonFormats.Result result = obj.result[i];
                             int id = result.message.from.id;
+
                             if (result.message.message_id > Params.LastUMid)
                             {
                                 switch (result.message.text)
@@ -136,11 +134,11 @@ namespace _1xParser
                                         }
                                         else
                                         {
-                                            SendMessage("Вы и так не получаете рассылку...", id);
+                                            SendMessage("Вы и так не получали рассылку...", id);
                                         }
                                         break;
                                     default:
-                                        SendMessage("Извините, но пока я вас не понимаю...", id);
+                                        SendMessage("Извините, но я вас не понимаю...", id);
                                         Utilites.LogWarning(result.message.from.first_name + " пишет: " + result.message.text);
                                         break;
                                 }
