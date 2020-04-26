@@ -65,13 +65,10 @@ namespace _1xParser
                             {   //если есть активные алгоритмы
                                 sleepAgain |= game.algoritms[0].actived | game.algoritms[1].actived | game.algoritms[2].actived;
                                 sleepAgain |= game.deleteFuncIsActivated;
-                                if (sleepAgain)
-                                {
-                                    Thread.Sleep(600000); //то подождать ещё 10 мин
-                                    break;
-                                }
                             }
                         }
+                        if (sleepAgain)
+                            Thread.Sleep(600000); //то подождать ещё 10 мин
                     }
                 }
                 catch(Exception e)

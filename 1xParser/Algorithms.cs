@@ -112,13 +112,13 @@ namespace _1xParser
                     string recomend = "";
                     if (deltaTotal >= 5)
                     {
-                        recomend = "ТМ " + totalL + " - " + game.TkfLess;
+                        recomend = "ТБ " + totalL + " - " + game.TkfLess;
                         Program.games[id].algoritms[1].sendedTotal = totalL;
                         Program.games[id].algoritms[1].tMore = false;
                     }
                     else if (deltaTotal <= -4)
                     {
-                        recomend = "ТБ " + totalL + " - " + game.TkfMore;
+                        recomend = "ТМ " + totalL + " - " + game.TkfMore;
                         Program.games[id].algoritms[1].sendedTotal = totalL;
                         Program.games[id].algoritms[1].tMore = true;
                     }
@@ -248,7 +248,7 @@ namespace _1xParser
                 {
                     TasksMgr.AddTask(new Task
                     {
-                        TimeUNIX = Utilites.NowUNIX() + 3660 - game.gameTime,
+                        TimeUNIX = Utilites.NowUNIX() + 30,
                         Func = CheckOnTheEnd,
                         GameID = id
                     });

@@ -20,37 +20,44 @@ namespace _1xParser
 
         public static string GetHTML(string url)
         {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 
+                | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
             for (int i = 0; i < 5; i++)
             {
-                lock (getHtmlLocker)
+                try
                 {
-                    try
+                    lock (getHtmlLocker)
                     {
                         using (WebClient client = new WebClient())
                         {
                             client.Encoding = Encoding.GetEncoding(1251);
-                            //client.Encoding = Encoding.UTF8;
                             client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+
                             Stream data = client.OpenRead(url);
                             StreamReader reader = new StreamReader(data, Encoding.UTF8);
                             string line = reader.ReadToEnd();
+
                             data.Close();
                             reader.Close();
 
                             return line;
                         }
                     }
-                    catch (Exception e)
-                    {
-                        LogException(e);
-                        Thread.Sleep(1500);
-                    }
+                }
+                catch (Exception e)
+                {
+                    LogException(e);
+                    Thread.Sleep(1500);
                 }
             }
             return null;
         }
         public static string Post(string url, string data)
         {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
             DateTime time = DateTime.Now;
             string Out = "";
             try
@@ -68,7 +75,6 @@ namespace _1xParser
                     req.Timeout = 10000;
                     req.ContentType = "application/x-www-form-urlencoded"; 
                     byte[] sentData = Encoding.GetEncoding(1251).GetBytes(data);
-                    //byte[] sentData = Encoding.UTF8.GetBytes(data);
                     req.ContentLength = sentData.Length;
                     Stream sendStream = req.GetRequestStream();
                     sendStream.Write(sentData, 0, sentData.Length);
@@ -100,7 +106,7 @@ namespace _1xParser
             }
 
             //К API Telegram разрешено обращаться примерно 30 раз в сек,
-            //поэтому на всяк случай отправляем поток на сон на 35 мс
+            //поэтому на всякий случай отправляем поток на сон на 35 мс
             int sleepTime = (int)(time.AddMilliseconds(35) - DateTime.Now).TotalMilliseconds;
             if (sleepTime > 0) Thread.Sleep(sleepTime);
 

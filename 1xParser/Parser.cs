@@ -86,7 +86,7 @@ namespace _1xParser
                         };
                         TasksMgr.AddTask(task);
                         game.deleteFuncIsActivated = true;
-                    }
+                    }/*
                     if (!game.algoritms[0].actived)
                     {
                         task = new Task
@@ -97,7 +97,7 @@ namespace _1xParser
                         };
                         TasksMgr.AddTask(task);
                         game.algoritms[0].actived = true;
-                    }
+                    }*/
                     if (!game.algoritms[1].actived)
                     {
                         task = new Task
@@ -108,7 +108,7 @@ namespace _1xParser
                         };
                         TasksMgr.AddTask(task);
                         game.algoritms[1].actived = true;
-                    }
+                    }/*
                     if (!game.algoritms[2].actived && game.favTeam >= 0)
                     {
                         task = new Task
@@ -119,7 +119,7 @@ namespace _1xParser
                         };
                         TasksMgr.AddTask(task);
                         game.algoritms[2].actived = true;
-                    }
+                    }*/
                 }
                 else if(!containsGame)
                 {
