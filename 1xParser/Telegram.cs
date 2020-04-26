@@ -120,7 +120,7 @@ namespace _1xParser
                                         {
                                             Params.Users.Add(id);
                                             SendMessage("Теперь вы будете получать рассылку", id);
-                                            Utilites.Log(result.message.from.first_name + " добавлен в список пользователей");
+                                            Debug.Log(result.message.from.first_name + " добавлен в список пользователей");
                                         }
                                         break;
                                     case "Стоп":
@@ -130,7 +130,7 @@ namespace _1xParser
                                         {
                                             Params.Users.Remove(id);
                                             SendMessage("Теперь вы не будете получать рассылку", id);
-                                            Utilites.Log(result.message.from.first_name + " удалён из списка пользователей");
+                                            Debug.Log(result.message.from.first_name + " удалён из списка пользователей");
                                         }
                                         else
                                         {
@@ -139,7 +139,7 @@ namespace _1xParser
                                         break;
                                     default:
                                         SendMessage("Извините, но я вас не понимаю...", id);
-                                        Utilites.LogWarning(result.message.from.first_name + " пишет: " + result.message.text);
+                                        Debug.LogWarning(result.message.from.first_name + " пишет: " + result.message.text);
                                         break;
                                 }
                             }
@@ -150,7 +150,7 @@ namespace _1xParser
                 }
                 catch (Exception e)
                 {
-                    Utilites.LogException(e);
+                    Debug.LogException(e);
                 }
             }
         }

@@ -54,7 +54,7 @@ namespace _1xParser
 
         public static bool LoadParams()
         {
-            Utilites.Log("Загрузка настроек");
+            Debug.Log("Загрузка настроек");
             if (File.Exists(paramsFile))
             {
                 try
@@ -68,7 +68,7 @@ namespace _1xParser
                 }
                 catch (Exception e)
                 {
-                    Utilites.LogException(e);
+                    Debug.LogException(e);
                     return false;
                 }
             }
@@ -113,7 +113,7 @@ namespace _1xParser
                             break;
                     }
                     File.Move(usersFile, errFile + i);
-                    Utilites.LogException(e);
+                    Debug.LogException(e);
                     return LoadBackup(id);
                 }
             }
@@ -137,7 +137,7 @@ namespace _1xParser
                 if (m_users == null || (lastSavedUsers != null && lastSavedUsers.Equals(m_users)))
                     return;
 
-                Utilites.Log("Сохраняю список пользователей...");
+                Debug.Log("Сохраняю список пользователей...");
                 string backupFile = backupDir + "/" + usersFile + ".";
                 Directory.CreateDirectory(backupDir);
 
@@ -192,7 +192,7 @@ namespace _1xParser
 
                 if (files.Count > 0)
                 {
-                    Utilites.LogWarning("Загружаю бекап файла списка пользователей");
+                    Debug.LogWarning("Загружаю бекап файла списка пользователей");
                     files.Sort((a, b) => a.CompareTo(b));
                     files.Reverse();
 

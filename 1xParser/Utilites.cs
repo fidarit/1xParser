@@ -11,7 +11,6 @@ namespace _1xParser
         static readonly DateTime unixHelper = new DateTime(1970, 1, 1);
         static readonly object getHtmlLocker = new object();
         static readonly object getPostLocker = new object();
-        const string logsFileName = "logs.txt";
 
         public static int NowUNIX()
         {
@@ -47,7 +46,7 @@ namespace _1xParser
                 }
                 catch (Exception e)
                 {
-                    LogException(e);
+                    Debug.LogException(e);
                     Thread.Sleep(1500);
                 }
             }
@@ -74,13 +73,16 @@ namespace _1xParser
                     req.Method = "POST";
                     req.Timeout = 10000;
                     req.ContentType = "application/x-www-form-urlencoded"; 
+
                     byte[] sentData = Encoding.GetEncoding(1251).GetBytes(data);
                     req.ContentLength = sentData.Length;
                     Stream sendStream = req.GetRequestStream();
                     sendStream.Write(sentData, 0, sentData.Length);
                     sendStream.Close();
+
                     WebResponse res = req.GetResponse();
                     Stream ReceiveStream = res.GetResponseStream();
+
                     using (StreamReader sr = new StreamReader(ReceiveStream, Encoding.UTF8))
                     {
                         char[] read = new char[256];
@@ -96,13 +98,13 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                LogException(e);
+                Debug.LogException(e);
             }
 
             if (Out.Length < 10)
             {
                 string s = string.Format("Что-то пошло не так с отправкой/получением данных: {0} {1}", url, data);
-                LogWarning(s);
+                Debug.LogWarning(s);
             }
 
             //К API Telegram разрешено обращаться примерно 30 раз в сек,
@@ -113,50 +115,5 @@ namespace _1xParser
             return Out;
         }
 
-        public static void LogException(Exception e)
-        {
-            if (!(e.Message.Contains("Thread") || e.Message.Contains("Поток"))) { 
-                LogError(e.StackTrace.Replace(" в ", Environment.NewLine + "\t в "));
-                LogError(e.Message);
-            }
-        }
-        public static void LogWarning(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            WriteLine(msg);
-            SaveToFileErrsAndWarnings(msg);
-        }
-        public static void LogError(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            WriteLine(msg);
-            SaveToFileErrsAndWarnings(msg);
-        }
-        public static void Log(string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            WriteLine(msg);
-        }
-
-        static void WriteLine(string msg)
-        {
-            Console.WriteLine(GetConsolePrefix() + msg);
-        }
-        static string GetConsolePrefix()
-        {
-            return DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " ";
-        }
-        static void SaveToFileErrsAndWarnings(string msg)
-        {
-            try
-            {
-                File.AppendAllText(logsFileName, GetConsolePrefix() + msg + Environment.NewLine);
-            }
-            catch(Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                WriteLine(e.Message);
-            }
-        }
     }
 }

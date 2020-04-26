@@ -73,7 +73,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.LogException(e);
+                Debug.LogException(e);
             }
         }
         static void UsersSaving()
@@ -88,12 +88,12 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.LogException(e);
+                Debug.LogException(e);
             }
         }
         public static void PrefClosing()
         {
-            Utilites.Log("Остановка фоновых задач");
+            Debug.Log("Остановка фоновых задач");
             doOtherThreads = false;
             Program.games.Clear();
             tasks.Clear();
@@ -137,7 +137,7 @@ namespace _1xParser
 
             Params.SaveUsers();
 
-            Utilites.Log("Завершение работы");
+            Debug.Log("Завершение работы");
         }
         static void DoIt()
         {
@@ -160,7 +160,7 @@ namespace _1xParser
                     }
                     catch (Exception e)
                     {
-                        Utilites.LogException(e);
+                        Debug.LogException(e);
                     }
 
                     lock (tasksLocker)
@@ -172,7 +172,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.LogException(e);
+                Debug.LogException(e);
             }
         }
     }

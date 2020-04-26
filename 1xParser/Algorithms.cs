@@ -21,7 +21,7 @@ namespace _1xParser
                     string team1 = game.teams[0].name;
                     string team2 = game.teams[1].name;
 
-                    Utilites.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Тотал Матча\"");
+                    Debug.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Тотал Матча\"");
 
                     if (game.teams[0].kf * game.teams[1].kf > 0)
                     {
@@ -98,7 +98,7 @@ namespace _1xParser
                     string team1 = game.teams[0].name;
                     string team2 = game.teams[1].name;
 
-                    Utilites.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Тотал в 1 тайме\"");
+                    Debug.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Тотал в 1 тайме\"");
 
                     if (game.teams[0].kf * game.teams[1].kf > 0)
                     {
@@ -193,7 +193,7 @@ namespace _1xParser
                     string team1 = game.teams[0].name;
                     string team2 = game.teams[1].name;
 
-                    Utilites.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Индивидуальный тотал Фаворита\"");
+                    Debug.Log("Проверка игры \"" + team1 + " - " + team2 + "\" на \"Индивидуальный тотал Фаворита\"");
 
                     if (game.teams[0].kf * game.teams[1].kf > 0)
                     {
@@ -276,7 +276,7 @@ namespace _1xParser
 
                     text += " " + goals;
                     
-                    Utilites.Log("Редактирую сообщения");
+                    Debug.Log("Редактирую сообщения");
 
                     foreach (Message message in algoritm.messages)
                     {

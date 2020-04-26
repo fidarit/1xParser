@@ -51,7 +51,7 @@ namespace _1xParser
             }
             catch(Exception e)
             {
-                Utilites.LogException(e);
+                Debug.LogException(e);
             }
         }
     }

@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms.cs" />
+    <Compile Include="Debug.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="jsonFormat.cs" />
     <Compile Include="Params.cs" />

@@ -12,7 +12,7 @@ namespace _1xParser
             if (lastLNParseTime.AddSeconds(5) > DateTime.Now)
                 return;
 
-            Utilites.Log("Проверяю страницу \"Линия\"");
+            Debug.Log("Проверяю страницу \"Линия\"");
             jsonFormats.ValueLN[] results;
             try
             {
@@ -24,7 +24,7 @@ namespace _1xParser
             }
             catch(Exception e)
             {
-                Utilites.LogException(e);
+                Debug.LogException(e);
                 return;
             }
             if (results == null)
@@ -142,7 +142,6 @@ namespace _1xParser
             if (lastLVParseTime.AddSeconds(5) > DateTime.Now)
                 return;
 
-            //Utilites.Log("Проверяю страницу \"Live\"");
             jsonFormats.ValueLV[] results;
             try
             {
@@ -154,7 +153,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.LogException(e);
+                Debug.LogException(e);
                 return;
             }
             if (results == null)
@@ -234,7 +233,7 @@ namespace _1xParser
             }
             catch (Exception e)
             {
-                Utilites.LogException(e);
+                Debug.LogException(e);
                 return;
             }
 
@@ -291,7 +290,7 @@ namespace _1xParser
             }
             catch(Exception ex)
             {
-                Utilites.LogException(ex);
+                Debug.LogException(ex);
                 return null;
             }
         }

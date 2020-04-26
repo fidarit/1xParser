@@ -25,30 +25,30 @@ namespace _1xParser
             {
                 try
                 {
-                    Utilites.Log("Запуск программы");
+                    Debug.Log("Запуск программы");
                     games = new Dictionary<int, Game>();
                     TasksMgr.doOtherThreads = true;
 
                     if (!Params.LoadParams())
                     {
-                        Utilites.LogError("Файл настроек не обнаружен - \"params.xml\", создаю новый...");
+                        Debug.LogError("Файл настроек не обнаружен - \"params.xml\", создаю новый...");
                     }
                     if (!Params.LoadUsers())
                     {
-                        Utilites.LogError("Файл со списком пользователей не обнаружен  - \"users.xml\", создаю новый...");
+                        Debug.LogError("Файл со списком пользователей не обнаружен  - \"users.xml\", создаю новый...");
                     }
                     if (Params.TelegToken == null || Params.TelegToken.Length < 6)
                     {
-                        Utilites.LogError("Токен Telegram API не обнаружен, надо ввести его в файле params.xml");
-                        Utilites.LogWarning("Завершение работы...");
+                        Debug.LogError("Токен Telegram API не обнаружен, надо ввести его в файле params.xml");
+                        Debug.LogWarning("Завершение работы...");
                         Console.WriteLine("Press any key to exit...");
                         Console.ReadKey();
                         return -1;
                     }
                     
-                    Utilites.Log("Нажмите Ctrl + C чтобы сохранить список пользователей");
+                    Debug.Log("Нажмите Ctrl + C чтобы сохранить список пользователей");
 
-                    Utilites.Log("Запускаю сервисы Telegram");
+                    Debug.Log("Запускаю сервисы Telegram");
                     Telegram.StartMsgUpd();
 
                     TasksMgr.StartLineParsing();
@@ -73,7 +73,7 @@ namespace _1xParser
                 }
                 catch(Exception e)
                 {
-                    Utilites.LogException(e);                    
+                    Debug.LogException(e);                    
                 }
                 finally
                 {
