@@ -63,7 +63,9 @@ namespace _1xParser
                         {
                             foreach (Game game in games.Values)
                             {   //если есть активные алгоритмы
-                                sleepAgain |= game.algoritms[0].actived | game.algoritms[1].actived | game.algoritms[2].actived;
+                                sleepAgain |= game.algoritms[0].actived;
+                                sleepAgain |= game.algoritms[1].actived;
+                                sleepAgain |= game.algoritms[2].actived;
                                 sleepAgain |= game.deleteFuncIsActivated;
                             }
                         }
@@ -83,6 +85,7 @@ namespace _1xParser
             return 0;
         }
 
+        //Весь код ниже взаимствован из StackOverflow
         public delegate bool HandlerRoutine(CtrlTypes CtrlType);
         private static HandlerRoutine handlerRoutine;
         private static GCHandle gcObjKeyboardProcess = GCHandle.Alloc(handlerRoutine);
