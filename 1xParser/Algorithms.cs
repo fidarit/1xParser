@@ -254,7 +254,7 @@ namespace _1xParser
                     });
                     return;
                 }
-                //
+                //смайлы в Telegram
                 string yes = Encoding.UTF8.GetString(new byte[] { 0xE2, 0x9C, 0x85 });
                 string not = Encoding.UTF8.GetString(new byte[] { 0xE2, 0x9D, 0x8E });
 
