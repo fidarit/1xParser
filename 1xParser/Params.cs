@@ -107,12 +107,14 @@ namespace _1xParser
                 {
                     int i = 0;
                     string errFile = usersFile + ".err";
+
                     while (File.Exists(errFile + i))
                     {
                         if (++i > 9)
                             break;
                     }
                     File.Move(usersFile, errFile + i);
+
                     Debug.LogException(e);
                     return LoadBackup(id);
                 }
@@ -204,6 +206,7 @@ namespace _1xParser
             return false;
         }
     }
+
     [Serializable]
     public class ParamsObj
     {
@@ -221,6 +224,7 @@ namespace _1xParser
                 && proxyPort == obj.proxyPort;
         }
     }
+
     [Serializable]
     public class UsersObj
     {
