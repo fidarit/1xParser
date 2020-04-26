@@ -20,15 +20,6 @@ namespace _1xParser
         public static Thread parsingThread;
         public static Thread usersSavingThread;
 
-        public static void StartLineParsing()
-        {
-            if (parsingThread == null || !parsingThread.IsAlive)
-            {
-                parsingThread = new Thread(LineParsing);
-                parsingThread.Name += " Line Parsing Thread";
-                parsingThread.Start();
-            }
-        }
         public static void AddTask(Task task)
         {
             lock (tasksLocker)
@@ -41,7 +32,7 @@ namespace _1xParser
                 }
                 if (taskThread == null || !taskThread.IsAlive)
                 {
-                    taskThread = new Thread(DoIt);
+                    taskThread = new Thread(CompleteTask);
                     taskThread.Name += " Task Thread";
                     taskThread.Start();
                 }
@@ -50,7 +41,16 @@ namespace _1xParser
                 tasks.Sort((a, b) => a.TimeUNIX.CompareTo(b.TimeUNIX));
             }
         }
-        public static void StartUsersSaving()
+        public static void StartLineParsing()
+        {
+            if (parsingThread == null || !parsingThread.IsAlive)
+            {
+                parsingThread = new Thread(LineParsing);
+                parsingThread.Name += " Line Parsing Thread";
+                parsingThread.Start();
+            }
+        }
+        public static void StartUsersSavingThread()
         {
             if (usersSavingThread == null || !usersSavingThread.IsAlive)
             {
@@ -139,7 +139,7 @@ namespace _1xParser
 
             Debug.Log("Завершение работы");
         }
-        static void DoIt()
+        static void CompleteTask()
         {
             try
             {
@@ -150,9 +150,10 @@ namespace _1xParser
                     {
                         task = tasks[0];
                     }
-                    int sleepTime = task.TimeUNIX - Utilites.NowUNIX();
 
-                    if (sleepTime > 0) Thread.Sleep(sleepTime * 1000);
+                    int sleepTime = task.TimeUNIX - Utilites.NowUNIX();
+                    if (sleepTime > 0)
+                        Thread.Sleep(sleepTime * 1000);
 
                     try
                     {

@@ -52,7 +52,7 @@ namespace _1xParser
                     Telegram.StartMsgUpd();
 
                     TasksMgr.StartLineParsing();
-                    TasksMgr.StartUsersSaving();
+                    TasksMgr.StartUsersSavingThread();
 
                     Thread.Sleep(6 * 3600 * 1000); //ждать 6 часов
                     bool sleepAgain = true;
