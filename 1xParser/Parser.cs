@@ -7,6 +7,9 @@ namespace _1xParser
     {
         private static DateTime lastLNParseTime = DateTime.MinValue;
         private static DateTime lastLVParseTime = DateTime.MinValue;
+
+        //Я понимаю, что весь код связанный с json нечитабелен, но json в
+        //источнике минифицирован, поэтому я просто не знал, что делать
         public static void ParseLine(int ID = -1)
         {
             if (lastLNParseTime.AddSeconds(5) > DateTime.Now)
@@ -18,18 +21,21 @@ namespace _1xParser
             {
                 string url = "https://1xstavka.ru/LineFeed/Get1x2_VZip?sports=8&count=50&mode=4&country=1&partner=51&getEmpty=true";
                 string strRes = Utilites.GetHTML(url);
+
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
-                jsonFormats.LineRootObj obj = serializer.Deserialize<jsonFormats.LineRootObj>(strRes);
-                results = obj.Value;
+                var obj = serializer.Deserialize<jsonFormats.LineRootObj>(strRes);
+
+                if (obj == null || obj.Value == null)
+                    return;
+
+                results = obj?.Value;
             }
             catch(Exception e)
             {
                 Debug.LogException(e);
                 return;
             }
-            if (results == null)
-                return;
-            
+
             for (int i = 0; i < results.Length; i++)
             {
                 jsonFormats.ValueLN result = results[i];
@@ -49,8 +55,10 @@ namespace _1xParser
                     game.league = result.L;
                     game.startTimeUNIX = result.S;
                     game.updTimeUNIX = Utilites.NowUNIX();
+
                     if (result.E.Length < 10)
                         continue;
+
                     game.totalF = result.E[8].P;
                     game.TkfMore = result.E[8].C;
                     game.TkfLess = result.E[9].C;
@@ -75,10 +83,10 @@ namespace _1xParser
                         game.iTotalF = result.E[12 + game.favTeam].P;
                     }
 
-                    Task task;
-                    if (!game.deleteFuncIsActivated) //Алгоритм, который проверяет и удаляет игру в конце
+                    //Алгоритм, который проверяет и удаляет игру в конце
+                    if (!game.deleteFuncIsActivated) 
                     {
-                        task = new Task
+                        Task task = new Task
                         {
                             GameID = id,
                             TimeUNIX = game.startTimeUNIX + 3660, //61 min
@@ -89,7 +97,7 @@ namespace _1xParser
                     }/*
                     if (!game.algoritms[0].actived)
                     {
-                        task = new Task
+                        Task task = new Task
                         {
                             GameID = id,
                             TimeUNIX = game.startTimeUNIX + 600, //10 min
@@ -100,7 +108,7 @@ namespace _1xParser
                     }*/
                     if (!game.algoritms[1].actived)
                     {
-                        task = new Task
+                        Task task = new Task
                         {
                             GameID = id,
                             TimeUNIX = game.startTimeUNIX + 300, //5 min
@@ -111,7 +119,7 @@ namespace _1xParser
                     }/*
                     if (!game.algoritms[2].actived && game.favTeam >= 0)
                     {
-                        task = new Task
+                        Task task = new Task
                         {
                             GameID = id,
                             TimeUNIX = game.startTimeUNIX + 1800, //30 min
@@ -147,17 +155,20 @@ namespace _1xParser
             {
                 string url = "https://1xstavka.ru/LiveFeed/Get1x2_VZip?sports=8&count=50&mode=4&country=1&partner=51&getEmpty=true";
                 string strRes = Utilites.GetHTML(url);
+
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
-                jsonFormats.LiveRootObj obj = serializer.Deserialize<jsonFormats.LiveRootObj>(strRes);
-                results = obj.Value;
+                var obj = serializer.Deserialize<jsonFormats.LiveRootObj>(strRes);
+
+                if (obj == null || obj.Value == null)
+                    return;
+
+                results = obj?.Value;
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
                 return;
             }
-            if (results == null)
-                return;
 
             for (int i = 0; i < results.Length; i++)
             {
@@ -226,9 +237,11 @@ namespace _1xParser
                 string url = "https://1xstavka.ru/LiveFeed/GetGameZip?id=" + id + "&lng=ru&partner=51";
                 string strRes = Utilites.GetHTML(url);
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
-                jsonFormats.GameResRootObj obj = serializer.Deserialize<jsonFormats.GameResRootObj>(strRes);
+                var obj = serializer.Deserialize<jsonFormats.GameResRootObj>(strRes);
 
-                if (obj == null || obj.Value == null) return;
+                if (obj == null || obj.Value == null)
+                    return;
+
                 result = obj.Value;
             }
             catch (Exception e)
