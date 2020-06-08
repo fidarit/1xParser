@@ -13,7 +13,8 @@ namespace _1xParser
 
         public static bool EditMessage(string text, int targetID, int msgID)
         {
-            string resultText = Utilites.Post("https://api.telegram.org/bot" + Params.TelegToken + "/editMessageText",
+            string resultText = Utilites.Post("https://api.telegram.org/bot"
+                + Params.TelegToken + "/editMessageText",
                 "chat_id=" + targetID + 
                 "&message_id=" + msgID + 
                 "&text=" + HttpUtility.UrlEncode(text, Encoding.UTF8));
@@ -101,49 +102,8 @@ namespace _1xParser
                     if (obj != null && obj.ok && obj.result.Length > 0)
                     {
                         for (int i = 0; i < obj.result.Length; i++)
-                        {
-                            jsonFormats.Result result = obj.result[i];
-                            int id = result.message.from.id;
+                            ProcessMessage(obj.result[i]);
 
-                            if (result.message.message_id > Params.LastUMid)
-                            {
-                                switch (result.message.text)
-                                {
-                                    case "Старт":
-                                    case "cтарт":
-                                    case "/start":
-                                        if (Params.Users.Contains(id))
-                                        {
-                                            SendMessage("Для вас уже включена рассылка", id);
-                                        }
-                                        else
-                                        {
-                                            Params.Users.Add(id);
-                                            SendMessage("Теперь вы будете получать рассылку", id);
-                                            Debug.Log(result.message.from.first_name + " добавлен в список пользователей");
-                                        }
-                                        break;
-                                    case "Стоп":
-                                    case "cтоп":
-                                    case "/stop":
-                                        if (Params.Users.Contains(id))
-                                        {
-                                            Params.Users.Remove(id);
-                                            SendMessage("Теперь вы не будете получать рассылку", id);
-                                            Debug.Log(result.message.from.first_name + " удалён из списка пользователей");
-                                        }
-                                        else
-                                        {
-                                            SendMessage("Вы и так не получали рассылку...", id);
-                                        }
-                                        break;
-                                    default:
-                                        SendMessage("Извините, но я вас не понимаю...", id);
-                                        Debug.LogWarning(result.message.from.first_name + " пишет: " + result.message.text);
-                                        break;
-                                }
-                            }
-                        }
                         Params.LastUMid = obj.result[obj.result.Length - 1].message.message_id;
                     }
                     Thread.Sleep(1500);
@@ -151,6 +111,52 @@ namespace _1xParser
                 catch (Exception e)
                 {
                     Debug.LogException(e);
+                }
+            }
+        }
+        private static void ProcessMessage(jsonFormats.Result result)
+        {
+            int id = result.message.from.id;
+
+            if (result.message.message_id > Params.LastUMid)
+            {
+                switch (result.message.text)
+                {
+                    case "Старт":
+                    case "cтарт":
+                    case "/start":
+                        if (Params.Users.Contains(id))
+                        {
+                            SendMessage("Для вас уже включена рассылка", id);
+                        }
+                        else
+                        {
+                            Params.Users.Add(id);
+                            SendMessage("Теперь вы будете получать рассылку", id);
+                            Debug.Log(result.message.from.first_name
+                                + " добавлен в список пользователей");
+                        }
+                        break;
+                    case "Стоп":
+                    case "cтоп":
+                    case "/stop":
+                        if (Params.Users.Contains(id))
+                        {
+                            Params.Users.Remove(id);
+                            SendMessage("Теперь вы не будете получать рассылку", id);
+                            Debug.Log(result.message.from.first_name
+                                + " удалён из списка пользователей");
+                        }
+                        else
+                        {
+                            SendMessage("Вы и так не получали рассылку...", id);
+                        }
+                        break;
+                    default:
+                        SendMessage("Извините, но я вас не понимаю...", id);
+                        Debug.LogWarning(result.message.from.first_name
+                            + " пишет: " + result.message.text);
+                        break;
                 }
             }
         }
