@@ -91,7 +91,7 @@
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TasksMgr.cs" />
+    <Compile Include="TaskManager.cs" />
     <Compile Include="Telegram.cs" />
     <Compile Include="Utilites.cs" />
   </ItemGroup>

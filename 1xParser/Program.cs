@@ -27,7 +27,7 @@ namespace _1xParser
                 {
                     Debug.Log("Запуск программы");
                     games = new Dictionary<int, Game>();
-                    TasksMgr.doOtherThreads = true;
+                    TaskManager.doOtherThreads = true;
 
                     if (!Params.LoadParams())
                     {
@@ -51,8 +51,8 @@ namespace _1xParser
                     Debug.Log("Запускаю сервисы Telegram");
                     Telegram.StartMsgUpd();
 
-                    TasksMgr.StartLineParsing();
-                    TasksMgr.StartUsersSavingThread();
+                    TaskManager.StartLineParsing();
+                    TaskManager.StartUsersSavingThread();
 
                     Thread.Sleep(6 * 3600 * 1000); //ждать 6 часов
                     bool sleepAgain = true;
@@ -79,7 +79,7 @@ namespace _1xParser
                 }
                 finally
                 {
-                    TasksMgr.PrefClosing();
+                    TaskManager.PrefClosing();
                 }
             }
             return 0;
@@ -117,7 +117,7 @@ namespace _1xParser
                 case CtrlTypes.CTRL_LOGOFF_EVENT:
                 case CtrlTypes.CTRL_SHUTDOWN_EVENT:
                     doItAll = false;
-                    TasksMgr.PrefClosing();
+                    TaskManager.PrefClosing();
                     Thread.Sleep(1500);
                     return true;
                 case CtrlTypes.CTRL_C_EVENT:

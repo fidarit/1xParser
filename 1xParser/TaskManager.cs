@@ -10,7 +10,7 @@ namespace _1xParser
         public int GameID { get; set; }
         public Action<int> Func { get; set; }
     }
-    static class TasksMgr
+    static class TaskManager
     {
         static readonly List<Task> tasks = new List<Task>();
         static readonly object tasksLocker = new object();
@@ -167,7 +167,8 @@ namespace _1xParser
                     lock (tasksLocker)
                     {
                         tasks.Remove(task);
-                        if (tasks.Count == 0) return;
+                        if (tasks.Count == 0)
+                            return;
                     }
                 }
             }

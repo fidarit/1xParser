@@ -71,7 +71,7 @@ namespace _1xParser
                 }
                 if (!ret)
                 {
-                    TasksMgr.AddTask(new Task
+                    TaskManager.AddTask(new Task
                     {
                         TimeUNIX = Utilites.NowUNIX() + 25,
                         Func = FirstAlg,
@@ -150,7 +150,7 @@ namespace _1xParser
                 }
                 if (!ret)
                 {
-                    TasksMgr.AddTask(new Task
+                    TaskManager.AddTask(new Task
                     {
                         TimeUNIX = Utilites.NowUNIX() + 25,
                         Func = SecondAlg,
@@ -169,7 +169,7 @@ namespace _1xParser
                 Game game = Program.games[id];
                 if (game.gameTime < 1800)
                 {
-                    TasksMgr.AddTask(new Task
+                    TaskManager.AddTask(new Task
                     {
                         TimeUNIX = Utilites.NowUNIX() + 1800 - game.gameTime,
                         Func = ThirdAlg,
@@ -179,7 +179,7 @@ namespace _1xParser
                 }
                 if (game.updTimeUNIX + 10 < Utilites.NowUNIX())
                 {
-                    TasksMgr.AddTask(new Task
+                    TaskManager.AddTask(new Task
                     {
                         TimeUNIX = Utilites.NowUNIX() + 5,
                         Func = ThirdAlg,
@@ -246,7 +246,7 @@ namespace _1xParser
                 //if game wasn't finished
                 if (!game.isFinished)
                 {
-                    TasksMgr.AddTask(new Task
+                    TaskManager.AddTask(new Task
                     {
                         TimeUNIX = Utilites.NowUNIX() + 30,
                         Func = CheckOnTheEnd,

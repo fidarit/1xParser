@@ -92,7 +92,7 @@ namespace _1xParser
                             TimeUNIX = game.startTimeUNIX + 3660, //61 min
                             Func = Algorithms.CheckOnTheEnd
                         };
-                        TasksMgr.AddTask(task);
+                        TaskManager.AddTask(task);
                         game.deleteFuncIsActivated = true;
                     }/*
                     if (!game.algoritms[0].actived)
@@ -103,7 +103,7 @@ namespace _1xParser
                             TimeUNIX = game.startTimeUNIX + 600, //10 min
                             Func = Algorithms.FirstAlg
                         };
-                        TasksMgr.AddTask(task);
+                        TaskManager.AddTask(task);
                         game.algoritms[0].actived = true;
                     }*/
                     if (!game.algoritms[1].actived)
@@ -114,7 +114,7 @@ namespace _1xParser
                             TimeUNIX = game.startTimeUNIX + 300, //5 min
                             Func = Algorithms.SecondAlg
                         };
-                        TasksMgr.AddTask(task);
+                        TaskManager.AddTask(task);
                         game.algoritms[1].actived = true;
                     }/*
                     if (!game.algoritms[2].actived && game.favTeam >= 0)
@@ -125,7 +125,7 @@ namespace _1xParser
                             TimeUNIX = game.startTimeUNIX + 1800, //30 min
                             Func = Algorithms.ThirdAlg
                         };
-                        TasksMgr.AddTask(task);
+                        TaskManager.AddTask(task);
                         game.algoritms[2].actived = true;
                     }*/
                 }
@@ -138,7 +138,7 @@ namespace _1xParser
                         TimeUNIX = game.startTimeUNIX - 300 + rand,
                         Func = ParseLine
                     };
-                    TasksMgr.AddTask(task);
+                    TaskManager.AddTask(task);
                 }
             }
             //

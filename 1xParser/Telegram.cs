@@ -89,7 +89,7 @@ namespace _1xParser
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
 
-            while (TasksMgr.doOtherThreads)
+            while (TaskManager.doOtherThreads)
             {
                 try
                 {
