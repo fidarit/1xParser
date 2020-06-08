@@ -50,7 +50,7 @@ namespace _1xParser
                     //оставить 2 знака после запятой ииии 1800=60*60 из уравнения клиента
                     rate -= Math.Round(game.totalF * game.gameTime / 3600, 2);
 
-                    string text = "#Signal_" + Params.LastSignalNumer
+                    string text = "#Signal_" + Settings.LastSignalNumer
                             + "\nАлгоритм - \"Тотал Матча\""
                             + "\nЛига - \"" + game.league + "\""
                             + "\nКоманда - \"" + team1 + " - " + team2 + "\""
@@ -79,7 +79,7 @@ namespace _1xParser
                     });
                 }
                 else //if signal was succesful sended to anybody
-                    Params.LastSignalNumer++;
+                    Settings.LastSignalNumer++;
             }
         }
         public static void SecondAlg(int id)
@@ -129,7 +129,7 @@ namespace _1xParser
                     //оставить 2 знака после запятой ииии 1800=30*60 из уравнения клиента
                     rate -= Math.Round(game.totalF * game.gameTime / 1800, 2); 
 
-                    string text = "#Signal_" + Params.LastSignalNumer
+                    string text = "#Signal_" + Settings.LastSignalNumer
                         + "\nАлгоритм - \"Тотал в 1 тайме\""
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
@@ -158,7 +158,7 @@ namespace _1xParser
                     });
                 }
                 else //if signal was succesful sended to anybody
-                    Params.LastSignalNumer++;
+                    Settings.LastSignalNumer++;
             }
         }
         public static void ThirdAlg(int id)
@@ -215,7 +215,7 @@ namespace _1xParser
                     Program.games[id].algoritms[2].sendedTotal = game.iTotalL;
                     Program.games[id].algoritms[2].tMore = true;
 
-                    string text = "#Signal_" + Params.LastSignalNumer
+                    string text = "#Signal_" + Settings.LastSignalNumer
                         + "\nАлгоритм - \"Индивидуальный тотал Фаворита\""
                         + "\nЛига - \"" + game.league + "\""
                         + "\nКоманда - \"" + team1 + " - " + team2 + "\""
@@ -230,7 +230,7 @@ namespace _1xParser
                     if (realGoals <= favGoalsAim && totalL < totalMF + realGoals)
                     {
                         if(Telegram.SendMessagesFromAlgorithms(text, 3, id))
-                            Params.LastSignalNumer++;
+                            Settings.LastSignalNumer++;
                     }
                 }
             }

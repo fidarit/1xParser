@@ -14,7 +14,7 @@ namespace _1xParser
         public static bool EditMessage(string text, int targetID, int msgID)
         {
             string resultText = Utilites.Post("https://api.telegram.org/bot"
-                + Params.TelegToken + "/editMessageText",
+                + Settings.TelegToken + "/editMessageText",
                 "chat_id=" + targetID + 
                 "&message_id=" + msgID + 
                 "&text=" + HttpUtility.UrlEncode(text, Encoding.UTF8));
@@ -24,7 +24,7 @@ namespace _1xParser
         public static int SendMessage(string text, int targetID)
         {
             string resultText = Utilites.Post("https://api.telegram.org/bot"
-                + Params.TelegToken + "/sendMessage",
+                + Settings.TelegToken + "/sendMessage",
                 "chat_id=" + targetID + 
                 "&text=" + HttpUtility.UrlEncode(text, Encoding.UTF8));
 
@@ -41,9 +41,9 @@ namespace _1xParser
             bool ret = true;
             lock (paramsUsersLock)
             {
-                for (int i = 0; i < Params.Users.Count; i++)
+                for (int i = 0; i < Settings.GetUsers.Count; i++)
                 {
-                    ret &= SendMessage(text, Params.Users[i]) != -1;
+                    ret &= SendMessage(text, Settings.GetUsers[i]) != -1;
                 }
             }
             return ret;
@@ -53,19 +53,19 @@ namespace _1xParser
             bool retResult = false;
             lock (paramsUsersLock)
             {
-                if (Params.Users.Count == 0)
+                if (Settings.GetUsers.Count == 0)
                     return true;
 
                 Program.games[gameID].algoritms[algoritm - 1].messageText = text;
 
-                for (int i = 0; i < Params.Users.Count; i++)
+                for (int i = 0; i < Settings.GetUsers.Count; i++)
                 {
-                    int result = SendMessage(text, Params.Users[i]);
+                    int result = SendMessage(text, Settings.GetUsers[i]);
                     if (result != -1)
                     {
                         Message message = new Message()
                         {
-                            chatID = Params.Users[i],
+                            chatID = Settings.GetUsers[i],
                             msgID = result
                         };
                         Program.games[gameID].algoritms[algoritm - 1].messages.Add(message);
@@ -93,9 +93,9 @@ namespace _1xParser
             {
                 try
                 {
-                    string offset = Params.LastUMid == -1 ? "" : "offset=" + (Params.LastUMid + 1);
+                    string offset = Settings.LastUMid == -1 ? "" : "offset=" + (Settings.LastUMid + 1);
                     string ret = Utilites.Post("https://api.telegram.org/bot"
-                        + Params.TelegToken + "/getUpdates", offset);
+                        + Settings.TelegToken + "/getUpdates", offset);
 
                     var obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
 
@@ -104,7 +104,7 @@ namespace _1xParser
                         for (int i = 0; i < obj.result.Length; i++)
                             ProcessMessage(obj.result[i]);
 
-                        Params.LastUMid = obj.result[obj.result.Length - 1].message.message_id;
+                        Settings.LastUMid = obj.result[obj.result.Length - 1].message.message_id;
                     }
                     Thread.Sleep(1500);
                 }
@@ -118,20 +118,20 @@ namespace _1xParser
         {
             int id = result.message.from.id;
 
-            if (result.message.message_id > Params.LastUMid)
+            if (result.message.message_id > Settings.LastUMid)
             {
                 switch (result.message.text)
                 {
                     case "Старт":
                     case "cтарт":
                     case "/start":
-                        if (Params.Users.Contains(id))
+                        if (Settings.GetUsers.Contains(id))
                         {
                             SendMessage("Для вас уже включена рассылка", id);
                         }
                         else
                         {
-                            Params.Users.Add(id);
+                            Settings.GetUsers.Add(id);
                             SendMessage("Теперь вы будете получать рассылку", id);
                             Debug.Log(result.message.from.first_name
                                 + " добавлен в список пользователей");
@@ -140,9 +140,9 @@ namespace _1xParser
                     case "Стоп":
                     case "cтоп":
                     case "/stop":
-                        if (Params.Users.Contains(id))
+                        if (Settings.GetUsers.Contains(id))
                         {
-                            Params.Users.Remove(id);
+                            Settings.GetUsers.Remove(id);
                             SendMessage("Теперь вы не будете получать рассылку", id);
                             Debug.Log(result.message.from.first_name
                                 + " удалён из списка пользователей");

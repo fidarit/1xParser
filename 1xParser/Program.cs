@@ -29,15 +29,15 @@ namespace _1xParser
                     games = new Dictionary<int, Game>();
                     TaskManager.doOtherThreads = true;
 
-                    if (!Params.LoadParams())
+                    if (!Settings.LoadParams())
                     {
                         Debug.LogError("Файл настроек не обнаружен - \"params.xml\", создаю новый...");
                     }
-                    if (!Params.LoadUsers())
+                    if (!Settings.LoadUsers())
                     {
                         Debug.LogError("Файл со списком пользователей не обнаружен  - \"users.xml\", создаю новый...");
                     }
-                    if (Params.TelegToken == null || Params.TelegToken.Length < 6)
+                    if (Settings.TelegToken == null || Settings.TelegToken.Length < 6)
                     {
                         Debug.LogError("Токен Telegram API не обнаружен, надо ввести его в файле params.xml");
                         Debug.LogWarning("Завершение работы...");
@@ -121,7 +121,7 @@ namespace _1xParser
                     Thread.Sleep(1500);
                     return true;
                 case CtrlTypes.CTRL_C_EVENT:
-                    Params.SaveUsers();
+                    Settings.SaveUsers();
                     return true;
                 default:
                     return false;

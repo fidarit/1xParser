@@ -64,9 +64,9 @@ namespace _1xParser
                 lock (getPostLocker)
                 {
                     WebRequest req = WebRequest.Create(url);
-                    if (Params.UseProxy)
+                    if (Settings.UseProxy)
                     {
-                        req.Proxy = new WebProxy(Params.ProxyIP, Params.ProxyPort);
+                        req.Proxy = new WebProxy(Settings.ProxyIP, Settings.ProxyPort);
                         req.Proxy.Credentials = CredentialCache.DefaultCredentials;
                     }
                     req.UseDefaultCredentials = true;

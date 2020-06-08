@@ -87,12 +87,14 @@
     <Compile Include="Debug.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="jsonFormat.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Params.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskManager.cs" />
     <Compile Include="Telegram.cs" />
+    <Compile Include="Users.cs" />
     <Compile Include="Utilites.cs" />
   </ItemGroup>
   <ItemGroup>

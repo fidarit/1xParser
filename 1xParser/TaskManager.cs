@@ -83,7 +83,7 @@ namespace _1xParser
                 while (doOtherThreads)
                 {
                     Thread.Sleep(30000); //30 sec
-                    Params.SaveUsers();
+                    Settings.SaveUsers();
                 }
             }
             catch (Exception e)
@@ -135,7 +135,7 @@ namespace _1xParser
                 }
             }
 
-            Params.SaveUsers();
+            Settings.SaveUsers();
 
             Debug.Log("Завершение работы");
         }
