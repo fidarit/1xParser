@@ -37,7 +37,7 @@ namespace _1xParser
                     {
                         Debug.LogError("Файл со списком пользователей не обнаружен  - \"users.xml\", создаю новый...");
                     }
-                    if (Settings.TelegToken == null || Settings.TelegToken.Length < 6)
+                    if (Settings.GetApiToken == null || Settings.GetApiToken.Length < 6)
                     {
                         Debug.LogError("Токен Telegram API не обнаружен, надо ввести его в файле params.xml");
                         Debug.LogWarning("Завершение работы...");

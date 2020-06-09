@@ -11,19 +11,19 @@ namespace _1xParser
         public List<int> users = new List<int>();
         public bool Equals(Users obj)
         {
-            bool ret = users.Count == obj.users.Count;
-            ret &= lastUMid == obj.lastUMid;
-            ret &= lastSignalNumer == obj.lastSignalNumer;
-            if (ret)
+            bool equals = users.Count == obj.users.Count;
+            equals &= lastUMid == obj.lastUMid;
+            equals &= lastSignalNumer == obj.lastSignalNumer;
+            if (equals)
             {
                 foreach (int user in obj.users)
                 {
-                    ret &= users.Contains(user);
-                    if (!ret)
+                    equals &= users.Contains(user);
+                    if (!equals)
                         break;
                 }
             }
-            return ret;
+            return equals;
         }
     }
 }

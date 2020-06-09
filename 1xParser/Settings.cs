@@ -16,22 +16,14 @@ namespace _1xParser
         const string usersFile = "users.xml";
         const string backupDir = "Backups";
 
-        public static string TelegToken
-        {
-            get { return m_params.telegToken; }
-            set { m_params.telegToken = value; }
-        }
-        public static List<int> GetUsers
-        {
-            get { return m_users.users; }
-            set { m_users.users = value; }
-        }
+        public static string GetApiToken => m_params.telegToken;
+        public static List<int> GetUsers => m_users.users;
         public static int LastUMid
         {
             get { return m_users.lastUMid; }
             set { m_users.lastUMid = value; }
         }
-        public static uint LastSignalNumer
+        public static uint LastSignalId
         {
             get { return m_users.lastSignalNumer; }
             set { m_users.lastSignalNumer = value; }

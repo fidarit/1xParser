@@ -14,7 +14,7 @@ namespace _1xParser
         public static bool EditMessage(string text, int targetID, int msgID)
         {
             string resultText = Utilites.Post("https://api.telegram.org/bot"
-                + Settings.TelegToken + "/editMessageText",
+                + Settings.GetApiToken + "/editMessageText",
                 "chat_id=" + targetID + 
                 "&message_id=" + msgID + 
                 "&text=" + HttpUtility.UrlEncode(text, Encoding.UTF8));
@@ -24,7 +24,7 @@ namespace _1xParser
         public static int SendMessage(string text, int targetID)
         {
             string resultText = Utilites.Post("https://api.telegram.org/bot"
-                + Settings.TelegToken + "/sendMessage",
+                + Settings.GetApiToken + "/sendMessage",
                 "chat_id=" + targetID + 
                 "&text=" + HttpUtility.UrlEncode(text, Encoding.UTF8));
 
@@ -95,7 +95,7 @@ namespace _1xParser
                 {
                     string offset = Settings.LastUMid == -1 ? "" : "offset=" + (Settings.LastUMid + 1);
                     string ret = Utilites.Post("https://api.telegram.org/bot"
-                        + Settings.TelegToken + "/getUpdates", offset);
+                        + Settings.GetApiToken + "/getUpdates", offset);
 
                     var obj = serializer.Deserialize<jsonFormats.GetUpdResRoot>(ret);
 
