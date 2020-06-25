@@ -120,9 +120,8 @@ namespace _1xParser
 
             if (result.message.message_id > Settings.LastUMid)
             {
-                switch (result.message.text)
+                switch (result.message.text.ToLower())
                 {
-                    case "Старт":
                     case "cтарт":
                     case "/start":
                         if (Settings.GetUsers.Contains(id))
@@ -137,7 +136,6 @@ namespace _1xParser
                                 + " добавлен в список пользователей");
                         }
                         break;
-                    case "Стоп":
                     case "cтоп":
                     case "/stop":
                         if (Settings.GetUsers.Contains(id))
